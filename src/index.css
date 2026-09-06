@@ -1,0 +1,191 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   テーマの仕組み
+   ------------------------------------------------------------
+   色・角丸・フォント・装飾効果をすべて「変数」にしてある。
+   <html data-theme="light"> が付くと下の上書きブロックが効き、
+   画面側のコードを一切変えずに見た目だけが切り替わる。
+
+   ここが既定値(= ダークモード / SF・HUD調)。
+   ライトモード(白基調)は下の data-theme='light' ブロックで定義する。
+   フォントの同梱(woff2)はフェーズ2以降。今はシステムフォントで表示する。
+   ============================================================ */
+
+@theme {
+  /* --- 背景の階層 --- */
+  --color-void: #070b14; /* 最背面・ヘッダー・タブバーの面 */
+  --color-deep: #0a0e1a; /* コンテンツ領域の背景 */
+  --color-panel: #111827; /* カード・パネル */
+  --color-panel-2: #1a1f2e; /* パネル上の一段違う面(入力欄など) */
+
+  /* --- 罫線 --- */
+  --color-line: #1f2937;
+  --color-line-glow: rgba(0, 240, 255, 0.22);
+
+  /* --- 文字 --- */
+  --color-hud: #e5e7eb; /* 本文 */
+  --color-hud-dim: #94a3b8; /* 補助情報 */
+  --color-hud-faint: #64748b; /* さらに弱い情報・プレースホルダー */
+
+  /* --- アクセント --- */
+  --color-cyan: #00f0ff; /* 主要アクセント・選択中 */
+  --color-electric: #2d5fff; /* ボタン・リンク */
+  --color-purple: #b24bff; /* サブアクセント */
+  --color-alert: #ff3b5c; /* 警告専用 */
+
+  /* --- フォント --- */
+  --font-hud:
+    'Rajdhani', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP',
+    'Yu Gothic', sans-serif;
+  --font-digit:
+    'Share Tech Mono', ui-monospace, 'SFMono-Regular', 'Hiragino Sans', 'Noto Sans JP',
+    monospace;
+  --font-body:
+    -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic',
+    sans-serif;
+
+  /* --- 角丸。ダークはシャープに --- */
+  --radius-sharp: 2px;
+  --radius-panel: 4px;
+}
+
+:root {
+  --fx-edge-line: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 240, 255, 0.5),
+    transparent
+  );
+  --fx-bg-grid:
+    linear-gradient(rgba(0, 240, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.028) 1px, transparent 1px);
+  --fx-bg-grid-size: 28px 28px;
+  --fx-scrim: rgba(7, 11, 20, 0.75);
+  --fx-frame: 0 0 60px -20px var(--color-cyan);
+  --radius-fab: 4px;
+}
+
+/* ============================================================
+   ライトモード(白基調・角丸大きめ・発光なし)
+   単なる色反転ではなく、独立した世界観として定義する。
+   ============================================================ */
+:root[data-theme='light'] {
+  --color-void: #ffffff;
+  --color-deep: #e8f0fa;
+  --color-panel: #ffffff;
+  --color-panel-2: #f1f5f9;
+
+  --color-line: #e2e8f0;
+  --color-line-glow: rgba(148, 163, 184, 0.35);
+
+  --color-hud: #1e293b;
+  --color-hud-dim: #64748b;
+  --color-hud-faint: #94a3b8;
+
+  --color-cyan: #3b82f6;
+  --color-electric: #2563eb;
+  --color-purple: #8b5cf6;
+  --color-alert: #ef4444;
+
+  --font-hud: var(--font-body);
+  --font-digit: var(--font-body);
+
+  --radius-sharp: 8px;
+  --radius-panel: 14px;
+  --radius-fab: 9999px;
+
+  --fx-edge-line: none;
+  --fx-bg-grid: none;
+  --fx-scrim: rgba(15, 23, 42, 0.4);
+  --fx-frame: 0 0 40px -18px rgba(15, 23, 42, 0.35);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-hud);
+    background-color: var(--color-void);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    /* スクロールは画面内の本文エリアだけに任せ、ページ全体は動かさない */
+    overflow: hidden;
+
+    background-image: var(--fx-bg-grid);
+    background-size: var(--fx-bg-grid-size);
+    background-attachment: fixed;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    color: inherit;
+    background-color: transparent;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-hud-faint);
+  }
+}
+
+@layer components {
+  /* --------------------------------------------------------
+     アプリ枠。
+     ~767px  : スマホ幅(28rem)で中央寄せ。下部にタブバー
+     768px~  : 左にサイドバー、右のコンテンツは横幅いっぱい
+     -------------------------------------------------------- */
+  .app-viewport {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .app-frame {
+    position: relative;
+    width: 100%;
+    max-width: 28rem;
+    height: 100%;
+    background-color: var(--color-deep);
+  }
+
+  @media (min-width: 30rem) and (max-width: 47.99rem) {
+    .app-frame {
+      border-left: 1px solid var(--color-line);
+      border-right: 1px solid var(--color-line);
+      box-shadow: var(--fx-frame);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .app-viewport {
+      justify-content: flex-start;
+    }
+    .app-frame {
+      flex: 1;
+      min-width: 0;
+      max-width: none;
+    }
+  }
+
+  .content-normal {
+    width: 100%;
+    margin-inline: auto;
+  }
+  @media (min-width: 48rem) {
+    .content-normal {
+      max-width: 44rem;
+    }
+  }
+}

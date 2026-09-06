@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="theme-color" content="#070b14" />
+    <meta name="description" content="日々の勉強時間を記録して可視化するアプリ" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="勉強時間" />
+    <title>勉強時間管理</title>
+  </head>
+  <body>
+    <script>
+      // React が動き出す前にテーマを確定させ、画面のちらつきを防ぐ。
+      // 保存できていない/読めない場合はダークにする。
+      ;(function () {
+        try {
+          var t = localStorage.getItem('benkyoujikan-theme')
+          document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark'
+          if (t === 'light') {
+            var m = document.querySelector('meta[name="theme-color"]')
+            if (m) m.setAttribute('content', '#ffffff')
+          }
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark'
+        }
+      })()
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+# 依存パッケージ
+node_modules
+
+# ビルド成果物
+dist
+dist-ssr
+dev-dist
+*.local
+
+# 環境変数(Firebaseの設定値を入れる。公開リポジトリに含めない)
+.env
+.env.*
+!.env.example
+
+# ログ
+logs
+*.log
+npm-debug.log*
+
+# エディタ / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+
+# 削除待ちファイル置き場(CLAUDE.mdのルール)
+削除用フォルダ/
