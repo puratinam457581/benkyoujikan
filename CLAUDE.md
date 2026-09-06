@@ -104,7 +104,7 @@ npm run preview   # ビルド結果のローカル確認(PWA動作確認はこ�
 - [x] フェーズ4: ホーム画面(HomeScreen)。今日の合計を特大表示 / 今日の教科別ドーナツ(PieChart・SubjectBreakdown、SVG自前描画)/ 今日の記録一覧 / 総計・カレンダー・比較への導線。集計は utils/aggregate.js、教科色は名前ハッシュ(colorForSubject)。旧 HomeInterim は 削除用フォルダ/ へ移動
 - [x] フェーズ5: カレンダー画面(CalendarScreen)。月グリッド(日曜始まり)・日セルに合計(h表記)+濃淡・前後月/今月 / 日タップでその日の内訳(SubjectBreakdown + RecordRow)。aggregate.minutesByDate 追加。※副産物: .app-body に flex:1 を追加(フェーズ2からの潜在バグ、コンテンツ幅が縮む問題を修正)
 - [x] フェーズ6: 総計画面(TotalScreen)。総勉強時間 + 記録数/日数/1日平均(studyStats)/ 教科別・教材別・活動内容別 の切替ドーナツ(GroupBreakdown、groupBy を全 field 対応 + count/color)/ 教科×教材×活動 の内訳リスト(comboBreakdown)。SubjectBreakdown は GroupBreakdown の薄いラッパに変更
-- [ ] フェーズ7: 比較機能 + 月間サマリー(日次/週次/月次の固定比較、増減・%・サマリー文・棒グラフ)
+- [x] フェーズ7: 比較機能 + 月間サマリー(CompareScreen)。日次(今日/昨日)・週次(今週/先週)・月次(今月/先月)の固定比較。サマリー文 + 増減(分・%) + 棒グラフ(BarChart) + 教科別増減リスト + 現在期間の教科別ドーナツ。utils/compare.js。月次セクションが spec 7.3 の月間サマリーを兼ねる。PlaceholderScreen は 削除用フォルダ/ へ
 - [ ] フェーズ8: PWA仕上げ(manifest/アイコン生成/Service Worker、オフライン動作、更新通知)
 - [ ] フェーズ9: デプロイ準備(相対パス化の確認、GitHub Actions、README)
 
