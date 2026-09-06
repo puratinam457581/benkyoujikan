@@ -59,6 +59,21 @@
 
 ---
 
+## 過去プロジェクト(時間割アプリ)からの学び
+
+PWA化・デプロイ・Tailwind4・CSS変数まわりは、以前作った時間割アプリ(`C:\Users\tkg07\Desktop\claude_space\jikannwari`、公開済み)で踏んだ地雷が Obsidian(`Code/Knowledge/`・`Code/Decisions/`)に記録されている。**着手前に該当ノートを読むこと。** 主なもの:
+
+- `github-pages-vite-pwa.md` — `base:'./'` / `start_url:'.'` / `scope:'.'` / `public/.nojekyll` でサブパス公開に対応。初回ワークフローは必ず失敗する→Settings→Pages→Source を GitHub Actions にして再実行。`workflow_dispatch:` を入れる。Public リポジトリ必須。
+- `github-push-gh007-email.md` — コミットの著者メールは noreply 形式(設定済み)。実メールだと push が GH007 で拒否される。
+- `css-variable-scope.md` — 要素ごとに違う値を入れる CSS 変数(教材の色など)は `:root` で合成しない。使う側のルールで `var()` する。
+- `tailwind-layer-order.md` — 自作ユーティリティと標準クラスを同一要素で併用しない。名前付き `@layer components` クラスにする。
+- `tailwind4-canvas-export.md` — Tailwind4 は `oklch()`/`color-mix()` 出力。画像化が必要なら html2canvas ではなく canvas 自前描画。
+- `ios-pwa-notification-limits.md` — サーバー無し構成では iOS PWA の定時通知は不可能。リマインダー(spec 9章・保留)を実装するなら「ローカル通知 + 起動時キャッチアップ」+ `.ics` 書き出し。
+
+**注意:** 時間割アプリの絶対制約「Firebase 不使用」は**この案件には適用されない**(spec.md が明示的に Firebase 無料枠を要求)。「完全無料・バックエンドを立てない・オフライン動作」は共通で維持する。
+
+---
+
 ## 実装上の注意
 
 - **データ消失より二重管理に注意。** 正典は Firestore。ローカルはキャッシュ + 起動時取得した状態のみ。複数端末の同時編集は想定しない(競合解決の仕組みは作らない)。
@@ -83,7 +98,7 @@ npm run preview   # ビルド結果のローカル確認(PWA動作確認はこ�
 
 - [x] 仕様書(spec.md)
 - [x] フェーズ0: プロジェクト初期化(Vite 8 + React 19 + Tailwind 4 + PWA + Firebase SDK、テーマ変数の土台)
-- [ ] フェーズ1: データ層 + 認証(Google ログイン、Firestore 読み書き、オフライン永続化、FIREBASE_SETUP.md)
+- [x] フェーズ1: データ層 + 認証(Google ログイン / AuthProvider・DataProvider / records・tags データ層 / firestore.rules / FIREBASE_SETUP.md)。※Firebase接続下の実確認はユーザーの .env 投入後
 - [ ] フェーズ2: 画面骨組み + 2テーマ(自前ナビ、下部タブ/PCサイドバー、テーマ切替)
 - [ ] フェーズ3: 記録フロー(3階層タグ、絞り込み候補、時間/分入力、ショートカット、前回と同じ、教材の色/アイコン)
 - [ ] フェーズ4: ホーム画面(今日の合計を特大表示、今日の教科別円グラフ)

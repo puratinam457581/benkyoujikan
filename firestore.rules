@@ -1,0 +1,19 @@
+rules_version = '2';
+
+// 勉強時間管理アプリの Firestore セキュリティルール。
+// Firebase コンソール > Firestore Database > ルール にこの内容を貼り付けて「公開」する。
+//
+// 方針:
+//   - ログインしていない人は一切読み書きできない
+//   - ログインしていても、読み書きできるのは自分の uid の下だけ
+//   （users/{自分のuid}/... 以外には触れない)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+  }
+}

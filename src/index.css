@@ -188,4 +188,53 @@
       max-width: 44rem;
     }
   }
+
+  /* --------------------------------------------------------
+     ボタン(共通の最小セット。フェーズ2で拡張する)
+     -------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-panel);
+    font-family: var(--font-hud);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition:
+      filter 0.15s ease,
+      background-color 0.15s ease;
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background-color: var(--color-electric);
+    color: #ffffff;
+  }
+  .btn-primary:not(:disabled):hover {
+    filter: brightness(1.12);
+  }
+
+  .btn-ghost {
+    background-color: var(--color-panel-2);
+    color: var(--color-hud);
+    border-color: var(--color-line);
+  }
+  .btn-ghost:not(:disabled):hover {
+    filter: brightness(1.15);
+  }
+
+  /* パネル(カード) */
+  .panel {
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-panel);
+  }
 }
