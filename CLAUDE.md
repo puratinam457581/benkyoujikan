@@ -98,8 +98,8 @@ npm run preview   # ビルド結果のローカル確認(PWA動作確認はこ�
 
 - [x] 仕様書(spec.md)
 - [x] フェーズ0: プロジェクト初期化(Vite 8 + React 19 + Tailwind 4 + PWA + Firebase SDK、テーマ変数の土台)
-- [x] フェーズ1: データ層 + 認証(Google ログイン / AuthProvider・DataProvider / records・tags データ層 / firestore.rules / FIREBASE_SETUP.md)。※Firebase接続下の実確認はユーザーの .env 投入後
-- [ ] フェーズ2: 画面骨組み + 2テーマ(自前ナビ、下部タブ/PCサイドバー、テーマ切替)
+- [x] フェーズ1: データ層 + 認証(Google ログイン / AuthProvider・DataProvider / records・tags データ層 / firestore.rules / FIREBASE_SETUP.md)。実機確認済み
+- [x] フェーズ2: 画面骨組み + 2テーマ(自前ナビ NavigationContext / 下部タブ TabBar・PCサイドバー Sidebar / ThemeProvider で dark↔light 切替 + localStorage 保持 / フォント同梱 / 設定画面は実装、他4画面は仮)
 - [ ] フェーズ3: 記録フロー(3階層タグ、絞り込み候補、時間/分入力、ショートカット、前回と同じ、教材の色/アイコン)
 - [ ] フェーズ4: ホーム画面(今日の合計を特大表示、今日の教科別円グラフ)
 - [ ] フェーズ5: カレンダー画面(月表示、日セルに合計、日タップで内訳)

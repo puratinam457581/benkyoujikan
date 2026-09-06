@@ -1,6 +1,42 @@
 @import 'tailwindcss';
 
 /* ============================================================
+   フォント(同梱)
+   外部サーバーから読まず、public/fonts/ のファイルを使う。
+   → オフラインでも確実に表示される
+   latin(英数字)のみ収録。日本語は自動でフォールバック先の
+   システムフォントになる。ライトモードでは装飾フォントを使わない。
+   ============================================================ */
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/rajdhani-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/rajdhani-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Rajdhani';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/rajdhani-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Share Tech Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/share-tech-mono-400.woff2') format('woff2');
+}
+
+/* ============================================================
    テーマの仕組み
    ------------------------------------------------------------
    色・角丸・フォント・装飾効果をすべて「変数」にしてある。
@@ -236,5 +272,41 @@
     background-color: var(--color-panel);
     border: 1px solid var(--color-line);
     border-radius: var(--radius-panel);
+  }
+
+  /* --------------------------------------------------------
+     発光表現(ダークのみ)。ライトでは打ち消す。
+     -------------------------------------------------------- */
+  .glow-sm {
+    box-shadow: 0 0 8px -1px var(--color-cyan);
+  }
+  .text-glow {
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.45);
+  }
+  /* ヘッダー下端・タブバー上端に走る、両端が消える光の線 */
+  .edge-line {
+    background: var(--fx-edge-line);
+  }
+  :root[data-theme='light'] .glow-sm {
+    box-shadow: none;
+  }
+  :root[data-theme='light'] .text-glow {
+    text-shadow: none;
+  }
+
+  /* --------------------------------------------------------
+     画面共通の縦組み(ヘッダー / 本文スクロール域 / タブバー)
+     -------------------------------------------------------- */
+  .app-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+  }
+  .app-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 }
