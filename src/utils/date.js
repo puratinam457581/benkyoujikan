@@ -43,3 +43,31 @@ export function formatHoursShort(min) {
   // 小数第1位まで。末尾の .0 は消す
   return `${Number(h.toFixed(1))}h`
 }
+
+const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
+
+// 'YYYY-MM-DD' → 「9月7日(日)」
+export function formatDateLabel(s) {
+  const d = fromDateStr(s)
+  return `${d.getMonth() + 1}月${d.getDate()}日(${WEEKDAYS[d.getDay()]})`
+}
+
+// その週の月曜の 'YYYY-MM-DD'(週の始まりを月曜とする)
+export function startOfWeekStr(s = todayStr()) {
+  const d = fromDateStr(s)
+  const dow = (d.getDay() + 6) % 7 // 月=0 … 日=6
+  d.setDate(d.getDate() - dow)
+  return toDateStr(d)
+}
+
+// その月の1日の 'YYYY-MM-DD'
+export function startOfMonthStr(s = todayStr()) {
+  const d = fromDateStr(s)
+  return toDateStr(new Date(d.getFullYear(), d.getMonth(), 1))
+}
+
+// n か月ずらした月初の 'YYYY-MM-DD'
+export function addMonthsStr(s, n) {
+  const d = fromDateStr(s)
+  return toDateStr(new Date(d.getFullYear(), d.getMonth() + n, 1))
+}

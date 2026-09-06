@@ -1,12 +1,12 @@
 import PlaceholderScreen from './PlaceholderScreen.jsx'
 import SettingsScreen from './SettingsScreen.jsx'
-import HomeInterim from './HomeInterim.jsx'
+import HomeScreen from './HomeScreen.jsx'
 
-// tab キー → 画面。設定とホームは実装済み(ホームはフェーズ4で作り直す)。
+// tab キー → 画面。
 export function renderScreen(tab) {
   switch (tab) {
     case 'home':
-      return <HomeInterim />
+      return <HomeScreen />
     case 'calendar':
       return (
         <PlaceholderScreen

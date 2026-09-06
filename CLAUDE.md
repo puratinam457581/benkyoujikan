@@ -100,8 +100,8 @@ npm run preview   # ビルド結果のローカル確認(PWA動作確認はこ�
 - [x] フェーズ0: プロジェクト初期化(Vite 8 + React 19 + Tailwind 4 + PWA + Firebase SDK、テーマ変数の土台)
 - [x] フェーズ1: データ層 + 認証(Google ログイン / AuthProvider・DataProvider / records・tags データ層 / firestore.rules / FIREBASE_SETUP.md)。実機確認済み
 - [x] フェーズ2: 画面骨組み + 2テーマ(自前ナビ NavigationContext / 下部タブ TabBar・PCサイドバー Sidebar / ThemeProvider で dark↔light 切替 + localStorage 保持 / フォント同梱 / 設定画面は実装、他4画面は仮)
-- [x] フェーズ3: 記録フロー。記録FAB→RecordModal(教科→教材→活動内容の3階層 TagChips、絞り込み候補、時間/分の2フィールド、日付、メモ、ショートカット=topCombos、前回と同じ、編集/削除 RecordRow)/ 教材の色・アイコン(materialStyle.js + 設定の MaterialStylesSection)/ ホームは HomeInterim(当日合計+最近の記録)。フェーズ4で作り直し
-- [ ] フェーズ4: ホーム画面(今日の合計を特大表示、今日の教科別円グラフ)
+- [x] フェーズ3: 記録フロー。記録FAB→RecordModal(教科→教材→活動内容の3階層 TagChips、絞り込み候補、時間/分の2フィールド、日付、メモ、ショートカット=topCombos、前回と同じ、編集/削除 RecordRow)/ 教材の色・アイコン(materialStyle.js + 設定の MaterialStylesSection)
+- [x] フェーズ4: ホーム画面(HomeScreen)。今日の合計を特大表示 / 今日の教科別ドーナツ(PieChart・SubjectBreakdown、SVG自前描画)/ 今日の記録一覧 / 総計・カレンダー・比較への導線。集計は utils/aggregate.js、教科色は名前ハッシュ(colorForSubject)。旧 HomeInterim は 削除用フォルダ/ へ移動
 - [ ] フェーズ5: カレンダー画面(月表示、日セルに合計、日タップで内訳)
 - [ ] フェーズ6: 総計画面(総勉強時間、教科・活動別の集計グラフ+リスト)
 - [ ] フェーズ7: 比較機能 + 月間サマリー(日次/週次/月次の固定比較、増減・%・サマリー文・棒グラフ)
