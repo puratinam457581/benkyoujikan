@@ -2,6 +2,7 @@ import PlaceholderScreen from './PlaceholderScreen.jsx'
 import SettingsScreen from './SettingsScreen.jsx'
 import HomeScreen from './HomeScreen.jsx'
 import CalendarScreen from './CalendarScreen.jsx'
+import TotalScreen from './TotalScreen.jsx'
 
 // tab キー → 画面。
 export function renderScreen(tab) {
@@ -11,13 +12,7 @@ export function renderScreen(tab) {
     case 'calendar':
       return <CalendarScreen />
     case 'total':
-      return (
-        <PlaceholderScreen
-          title="総計"
-          phase="フェーズ6"
-          note="これまでの総勉強時間と、教科・活動別の集計をグラフとリストで表示します。"
-        />
-      )
+      return <TotalScreen />
     case 'compare':
       return (
         <PlaceholderScreen

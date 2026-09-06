@@ -74,10 +74,13 @@ export function defaultColorFor(subject, material) {
   return PRESET_COLORS[hashString(key) % PRESET_COLORS.length]
 }
 
-// 教科の色。教科ごとの色設定は仕様に無いため、名前から一意に決める
+// 教科・活動内容の色。ユーザー設定は無いので名前から一意に決める
 // (グラフや凡例で毎回同じ色になるようにするための割り当て)。
 export function colorForSubject(subject) {
   return PRESET_COLORS[hashString(`subject:${subject}`) % PRESET_COLORS.length]
+}
+export function colorForActivity(activity) {
+  return PRESET_COLORS[hashString(`activity:${activity}`) % PRESET_COLORS.length]
 }
 
 // materialStyles(Firestore の1ドキュメント)から、その教材の { color, iconName } を解決する。

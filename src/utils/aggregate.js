@@ -1,6 +1,6 @@
 // 記録の集計。画面側はここを通して「合計」「教科別」などを取り出す。
 
-import { colorForSubject } from './materialStyle.js'
+import { colorForSubject, colorForActivity, defaultColorFor } from './materialStyle.js'
 
 export function sumMinutes(records) {
   return records.reduce((s, r) => s + (r.minutes || 0), 0)
@@ -26,18 +26,29 @@ export function recordsInRange(records, startStr, endStr) {
   return records.filter((r) => r.date >= startStr && r.date <= endStr)
 }
 
+function colorFor(field, key, sampleRecord) {
+  if (field === 'subject') return colorForSubject(key)
+  if (field === 'activity') return colorForActivity(key)
+  if (field === 'material') return defaultColorFor(sampleRecord?.subject || '', key)
+  return colorForSubject(key)
+}
+
 // 指定キー('subject' | 'material' | 'activity')で合計時間を集計。
-// 返り値: [{ key, minutes, color }] を minutes 降順で。
+// 返り値: [{ key, minutes, count, color }] を minutes 降順で。
 export function groupBy(records, field) {
   const map = new Map()
   for (const r of records) {
     const k = r[field] || '(未設定)'
-    map.set(k, (map.get(k) || 0) + (r.minutes || 0))
+    const cur = map.get(k) || { minutes: 0, count: 0, sample: r }
+    cur.minutes += r.minutes || 0
+    cur.count += 1
+    map.set(k, cur)
   }
-  const list = [...map.entries()].map(([key, minutes]) => ({
+  const list = [...map.entries()].map(([key, v]) => ({
     key,
-    minutes,
-    color: field === 'subject' ? colorForSubject(key) : undefined,
+    minutes: v.minutes,
+    count: v.count,
+    color: colorFor(field, key, v.sample),
   }))
   list.sort((a, b) => b.minutes - a.minutes)
   return list
@@ -50,6 +61,22 @@ export function subjectBreakdown(records) {
     ...row,
     ratio: total > 0 ? row.minutes / total : 0,
   }))
+}
+
+// 全体のサマリー(総計画面のヘッダー用)
+export function studyStats(records) {
+  const totalMin = sumMinutes(records)
+  const dates = new Set(records.map((r) => r.date).filter(Boolean))
+  const days = dates.size
+  const sorted = [...dates].sort()
+  return {
+    totalMin,
+    count: records.length,
+    days,
+    avgPerDayMin: days > 0 ? Math.round(totalMin / days) : 0,
+    firstDate: sorted[0] || null,
+    lastDate: sorted[sorted.length - 1] || null,
+  }
 }
 
 // 「教科・教材・活動」ごとの集計(総計画面用)
