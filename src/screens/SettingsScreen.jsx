@@ -1,5 +1,6 @@
 import { LogOut, Sun, Moon } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
+import MaterialStylesSection from './MaterialStylesSection.jsx'
 import { useAuth } from '../auth/AuthProvider.jsx'
 import { useTheme } from '../theme/ThemeProvider.jsx'
 import { useData } from '../data/DataProvider.jsx'
@@ -63,9 +64,7 @@ export default function SettingsScreen() {
         </p>
       </section>
 
-      <p className="text-xs text-hud-faint">
-        教材ごとの色・アイコンの設定はフェーズ3で追加します。
-      </p>
+      <MaterialStylesSection />
     </ScreenScaffold>
   )
 }

@@ -309,4 +309,132 @@
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
+
+  /* --------------------------------------------------------
+     入力欄(フォーム共通)
+     -------------------------------------------------------- */
+  .field-label {
+    font-family: var(--font-hud);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-hud-dim);
+  }
+  .field-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-sharp);
+    border: 1px solid var(--color-line);
+    background-color: var(--color-panel-2);
+    color: var(--color-hud);
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .field-input:focus {
+    border-color: var(--color-cyan);
+  }
+
+  /* --------------------------------------------------------
+     選択チップ(教科・教材・活動内容の候補)
+     -------------------------------------------------------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: var(--radius-sharp);
+    border: 1px solid var(--color-line);
+    background-color: var(--color-panel-2);
+    color: var(--color-hud-dim);
+    font-family: var(--font-hud);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.12s ease;
+  }
+  .chip:hover {
+    filter: brightness(1.12);
+  }
+  .chip[aria-pressed='true'] {
+    border-color: var(--color-cyan);
+    background-color: color-mix(in srgb, var(--color-cyan) 12%, transparent);
+    color: var(--color-cyan);
+  }
+
+  /* --------------------------------------------------------
+     記録ボタン(FAB)。下部タブバーの上に浮かせる。
+     -------------------------------------------------------- */
+  .fab {
+    position: absolute;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.35rem;
+    border-radius: var(--radius-fab);
+    background-color: var(--color-electric);
+    color: #ffffff;
+    font-family: var(--font-hud);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    box-shadow: 0 8px 24px -8px var(--color-electric);
+    cursor: pointer;
+  }
+  .fab:active {
+    filter: brightness(0.95);
+  }
+  /* スマホでは下部タブバーぶん持ち上げる */
+  @media (max-width: 47.99rem) {
+    .fab {
+      bottom: calc(4.25rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  /* --------------------------------------------------------
+     モーダル(下からせり上がるシート / PCは中央)
+     -------------------------------------------------------- */
+  .modal-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  @media (min-width: 48rem) {
+    .modal-layer {
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  .modal-scrim {
+    position: absolute;
+    inset: 0;
+    background: var(--fx-scrim);
+    backdrop-filter: blur(2px);
+  }
+  .modal-sheet {
+    position: relative;
+    width: 100%;
+    max-height: 88%;
+    overflow-y: auto;
+    background-color: var(--color-deep);
+    border-top: 1px solid var(--color-cyan);
+    border-top-left-radius: var(--radius-panel);
+    border-top-right-radius: var(--radius-panel);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  :root[data-theme='light'] .modal-sheet {
+    border-top-color: var(--color-line);
+  }
+  @media (min-width: 48rem) {
+    .modal-sheet {
+      max-width: 30rem;
+      max-height: 84%;
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius-panel);
+    }
+  }
 }

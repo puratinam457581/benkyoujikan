@@ -86,6 +86,15 @@ export function DataProvider({ children }) {
             a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt,
           ),
       )
+      // 教科/教材/活動を変更した場合、その組み合わせも履歴に残す
+      if (patch.subject && patch.material && patch.activity) {
+        try {
+          const nextTags = await recordTagUsage(uid, patch)
+          setTags(nextTags)
+        } catch {
+          /* 履歴更新の失敗は編集本体を妨げない */
+        }
+      }
     },
     [uid],
   )

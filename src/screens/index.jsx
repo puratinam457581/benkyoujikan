@@ -1,17 +1,12 @@
 import PlaceholderScreen from './PlaceholderScreen.jsx'
 import SettingsScreen from './SettingsScreen.jsx'
+import HomeInterim from './HomeInterim.jsx'
 
-// tab キー → 画面。フェーズ2では設定以外は仮画面。
+// tab キー → 画面。設定とホームは実装済み(ホームはフェーズ4で作り直す)。
 export function renderScreen(tab) {
   switch (tab) {
     case 'home':
-      return (
-        <PlaceholderScreen
-          title="ホーム"
-          phase="フェーズ4"
-          note="今日の合計勉強時間と教科別の円グラフ、記録ボタンをここに置きます。"
-        />
-      )
+      return <HomeInterim />
     case 'calendar':
       return (
         <PlaceholderScreen

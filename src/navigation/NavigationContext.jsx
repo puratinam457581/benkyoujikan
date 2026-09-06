@@ -19,6 +19,9 @@ export function NavigationProvider({ children }) {
   // フェーズ5以降で活用する。今は tab 切替のみ。
   const [detail, setDetail] = useState(null) // 例: { type: 'day', date: '2026-09-07' }
 
+  // 記録モーダル。open=表示中、prefill=初期値(編集や「前回と同じ」で使う)
+  const [record, setRecord] = useState({ open: false, prefill: null })
+
   const goTab = useCallback((key) => {
     setTab(key)
     setDetail(null)
@@ -27,9 +30,21 @@ export function NavigationProvider({ children }) {
   const openDetail = useCallback((d) => setDetail(d), [])
   const closeDetail = useCallback(() => setDetail(null), [])
 
+  const openRecord = useCallback((prefill = null) => setRecord({ open: true, prefill }), [])
+  const closeRecord = useCallback(() => setRecord({ open: false, prefill: null }), [])
+
   return (
     <NavigationContext.Provider
-      value={{ tab, setTab: goTab, detail, openDetail, closeDetail }}
+      value={{
+        tab,
+        setTab: goTab,
+        detail,
+        openDetail,
+        closeDetail,
+        record,
+        openRecord,
+        closeRecord,
+      }}
     >
       {children}
     </NavigationContext.Provider>
