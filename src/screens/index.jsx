@@ -1,6 +1,7 @@
 import PlaceholderScreen from './PlaceholderScreen.jsx'
 import SettingsScreen from './SettingsScreen.jsx'
 import HomeScreen from './HomeScreen.jsx'
+import CalendarScreen from './CalendarScreen.jsx'
 
 // tab キー → 画面。
 export function renderScreen(tab) {
@@ -8,13 +9,7 @@ export function renderScreen(tab) {
     case 'home':
       return <HomeScreen />
     case 'calendar':
-      return (
-        <PlaceholderScreen
-          title="カレンダー"
-          phase="フェーズ5"
-          note="月表示のカレンダーで、日ごとの合計と内訳を見られるようにします。"
-        />
-      )
+      return <CalendarScreen />
     case 'total':
       return (
         <PlaceholderScreen

@@ -11,6 +11,16 @@ export function recordsOnDate(records, dateStr) {
   return records.filter((r) => r.date === dateStr)
 }
 
+// 'YYYY-MM-DD' → 合計分 の Map(カレンダーのセル表示用)
+export function minutesByDate(records) {
+  const map = new Map()
+  for (const r of records) {
+    if (!r.date) continue
+    map.set(r.date, (map.get(r.date) || 0) + (r.minutes || 0))
+  }
+  return map
+}
+
 // start <= date <= end(いずれも 'YYYY-MM-DD' の文字列比較でよい)
 export function recordsInRange(records, startStr, endStr) {
   return records.filter((r) => r.date >= startStr && r.date <= endStr)
