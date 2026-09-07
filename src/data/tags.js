@@ -81,6 +81,66 @@ export async function recordTagUsage(uid, { subject, material, activity }) {
   return t
 }
 
+// 候補(タグ履歴)から1件消す。指定した階層だけを対象にする。
+//   { subject }                    … その教科と、ぶら下がる教材・活動・組み合わせ・色設定を全部
+//   { subject, material }          … その教材と、ぶら下がる活動・組み合わせ・色設定
+//   { subject, material, activity }… その活動内容と、一致する組み合わせだけ
+// 過去の記録(records)は消さない。記録を再保存すると候補として復活する。
+// 返り値: 更新後の { tags, materialStyles }
+export async function deleteTag(uid, { subject, material, activity }) {
+  const s = String(subject || '').trim()
+  const m = String(material || '').trim()
+  const a = String(activity || '').trim()
+  const t = await fetchTags(uid)
+  const styles = await fetchMaterialStyles(uid)
+  let stylesChanged = false
+
+  const dropStyle = (key) => {
+    if (styles[key] !== undefined) {
+      delete styles[key]
+      stylesChanged = true
+    }
+  }
+
+  if (s && m && a) {
+    const ck = comboKey(s, m)
+    if (Array.isArray(t.activities[ck])) {
+      t.activities[ck] = t.activities[ck].filter((x) => x !== a)
+      if (t.activities[ck].length === 0) delete t.activities[ck]
+    }
+    t.combos = t.combos.filter(
+      (c) => !(c.subject === s && c.material === m && c.activity === a),
+    )
+  } else if (s && m) {
+    const ck = comboKey(s, m)
+    if (Array.isArray(t.materials[s])) {
+      t.materials[s] = t.materials[s].filter((x) => x !== m)
+      if (t.materials[s].length === 0) delete t.materials[s]
+    }
+    delete t.activities[ck]
+    t.combos = t.combos.filter((c) => !(c.subject === s && c.material === m))
+    dropStyle(ck)
+  } else if (s) {
+    t.subjects = t.subjects.filter((x) => x !== s)
+    delete t.materials[s]
+    const prefix = `${s} ▸ `
+    for (const k of Object.keys(t.activities)) {
+      if (k === s || k.startsWith(prefix)) delete t.activities[k]
+    }
+    t.combos = t.combos.filter((c) => c.subject !== s)
+    for (const k of Object.keys(styles)) {
+      if (k === 'updatedAt') continue
+      if (k.startsWith(prefix)) dropStyle(k)
+    }
+  }
+
+  await setDoc(tagsDoc(uid), { ...t, updatedAt: Date.now() })
+  if (stylesChanged) {
+    await setDoc(materialStylesDoc(uid), { ...styles, updatedAt: Date.now() })
+  }
+  return { tags: t, materialStyles: styles }
+}
+
 // よく使う順(回数 → 直近使用)に上位 n 件。フェーズ3のショートカット表示で使う。
 export function topCombos(tags, n = 6) {
   return [...(tags.combos || [])]

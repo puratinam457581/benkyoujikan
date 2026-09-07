@@ -6,7 +6,13 @@ import {
   updateRecord as fbUpdateRecord,
   deleteRecord as fbDeleteRecord,
 } from './records.js'
-import { fetchTags, recordTagUsage, fetchMaterialStyles, setMaterialStyle } from './tags.js'
+import {
+  fetchTags,
+  recordTagUsage,
+  fetchMaterialStyles,
+  setMaterialStyle,
+  deleteTag as fbDeleteTag,
+} from './tags.js'
 
 const DataContext = createContext(null)
 
@@ -116,6 +122,17 @@ export function DataProvider({ children }) {
     [uid],
   )
 
+  // 候補(タグ履歴)から削除。target は { subject } / { subject, material } /
+  // { subject, material, activity } のいずれか。過去の記録は消さない。
+  const deleteTag = useCallback(
+    async (target) => {
+      const { tags: nextTags, materialStyles: nextStyles } = await fbDeleteTag(uid, target)
+      setTags(nextTags)
+      setMaterialStyles(nextStyles)
+    },
+    [uid],
+  )
+
   const value = {
     records,
     tags,
@@ -127,6 +144,7 @@ export function DataProvider({ children }) {
     updateRecord,
     deleteRecord,
     updateMaterialStyle,
+    deleteTag,
   }
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }
