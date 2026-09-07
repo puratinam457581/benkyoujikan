@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { registerPWA } from './pwa/register.js'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -9,4 +10,5 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
-// Service Worker の登録はフェーズ8(PWA仕上げ)で src/pwa/register.js を用意して呼ぶ。
+// Service Worker を登録(オフライン動作・ホーム画面追加)。描画を待たせないよう render の後で。
+registerPWA()

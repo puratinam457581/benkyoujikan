@@ -105,7 +105,7 @@ npm run preview   # ビルド結果のローカル確認(PWA動作確認はこ�
 - [x] フェーズ5: カレンダー画面(CalendarScreen)。月グリッド(日曜始まり)・日セルに合計(h表記)+濃淡・前後月/今月 / 日タップでその日の内訳(SubjectBreakdown + RecordRow)。aggregate.minutesByDate 追加。※副産物: .app-body に flex:1 を追加(フェーズ2からの潜在バグ、コンテンツ幅が縮む問題を修正)
 - [x] フェーズ6: 総計画面(TotalScreen)。総勉強時間 + 記録数/日数/1日平均(studyStats)/ 教科別・教材別・活動内容別 の切替ドーナツ(GroupBreakdown、groupBy を全 field 対応 + count/color)/ 教科×教材×活動 の内訳リスト(comboBreakdown)。SubjectBreakdown は GroupBreakdown の薄いラッパに変更
 - [x] フェーズ7: 比較機能 + 月間サマリー(CompareScreen)。日次(今日/昨日)・週次(今週/先週)・月次(今月/先月)の固定比較。サマリー文 + 増減(分・%) + 棒グラフ(BarChart) + 教科別増減リスト + 現在期間の教科別ドーナツ。utils/compare.js。月次セクションが spec 7.3 の月間サマリーを兼ねる。PlaceholderScreen は 削除用フォルダ/ へ
-- [ ] フェーズ8: PWA仕上げ(manifest/アイコン生成/Service Worker、オフライン動作、更新通知)
+- [x] フェーズ8: PWA仕上げ。scripts/generate-icons.mjs(zlib のみで PNG 生成、棒グラフモチーフ)/ src/pwa/{register.js, updateBus.js, PwaBanner.jsx}(virtual:pwa-register で SW 登録、更新は prompt 方式、更新/オフライン通知バナー)/ main.jsx で registerPWA()。dev サーバーで SW 登録・manifest・アイコン配信を確認。※実オフライン動作と更新バナーの最終確認はデプロイ後(GitHub Pages)に行う
 - [ ] フェーズ9: デプロイ準備(相対パス化の確認、GitHub Actions、README)
 
 進捗が動いたら、このチェックリストを更新すること。

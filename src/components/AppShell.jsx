@@ -3,6 +3,7 @@ import Header from './Header.jsx'
 import TabBar from './TabBar.jsx'
 import Fab from './Fab.jsx'
 import RecordModal from '../screens/RecordModal.jsx'
+import PwaBanner from '../pwa/PwaBanner.jsx'
 import { useNavigation } from '../navigation/NavigationContext.jsx'
 import { renderScreen } from '../screens/index.jsx'
 
@@ -21,6 +22,7 @@ export default function AppShell() {
           <div className="app-body">
             <Header />
             <div className="app-scroll">{renderScreen(tab)}</div>
+            <PwaBanner />
             <TabBar />
           </div>
         </div>
