@@ -7,7 +7,9 @@ export default function TabBar() {
 
   return (
     <nav
-      className="relative shrink-0 border-t border-line bg-void/90 backdrop-blur-sm md:hidden"
+      className="relative shrink-0 border-t border-line bg-void md:hidden"
+      // 下端はホームバー(スワイプ用の帯)の安全余白ぶん、タブバーの背景を
+      // そのまま伸ばす。ここを不透明にしておくと、余白が「空きスペース」に見えない。
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <span

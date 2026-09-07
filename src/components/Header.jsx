@@ -9,7 +9,12 @@ export default function Header() {
   const label = TABS.find((t) => t.key === tab)?.label ?? ''
 
   return (
-    <header className="relative shrink-0 border-b border-line bg-void/90 backdrop-blur-sm">
+    <header
+      className="relative shrink-0 border-b border-line bg-void backdrop-blur-sm"
+      // iPhone のステータスバー(時計・電波・電池)と重ならないよう、
+      // 上端に安全余白を足す。ホーム画面から起動した PWA で効く。
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+    >
       <span
         aria-hidden
         className="edge-line pointer-events-none absolute inset-x-0 bottom-0 h-px"
