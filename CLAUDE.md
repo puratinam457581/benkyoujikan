@@ -106,6 +106,12 @@ npm run preview   # ビルド結果のローカル確認(PWA動作確認はこ�
 - [x] フェーズ6: 総計画面(TotalScreen)。総勉強時間 + 記録数/日数/1日平均(studyStats)/ 教科別・教材別・活動内容別 の切替ドーナツ(GroupBreakdown、groupBy を全 field 対応 + count/color)/ 教科×教材×活動 の内訳リスト(comboBreakdown)。SubjectBreakdown は GroupBreakdown の薄いラッパに変更
 - [x] フェーズ7: 比較機能 + 月間サマリー(CompareScreen)。日次(今日/昨日)・週次(今週/先週)・月次(今月/先月)の固定比較。サマリー文 + 増減(分・%) + 棒グラフ(BarChart) + 教科別増減リスト + 現在期間の教科別ドーナツ。utils/compare.js。月次セクションが spec 7.3 の月間サマリーを兼ねる。PlaceholderScreen は 削除用フォルダ/ へ
 - [x] フェーズ8: PWA仕上げ。scripts/generate-icons.mjs(zlib のみで PNG 生成、棒グラフモチーフ)/ src/pwa/{register.js, updateBus.js, PwaBanner.jsx}(virtual:pwa-register で SW 登録、更新は prompt 方式、更新/オフライン通知バナー)/ main.jsx で registerPWA()。dev サーバーで SW 登録・manifest・アイコン配信を確認。※実オフライン動作と更新バナーの最終確認はデプロイ後(GitHub Pages)に行う
-- [ ] フェーズ9: デプロイ準備(相対パス化の確認、GitHub Actions、README)
+- [x] フェーズ9: デプロイ準備。.github/workflows/deploy.yml(push main + workflow_dispatch、build ステップで VITE_FIREBASE_* を ${{ vars.* }} から注入)/ README に公開手順(Public リポジトリ / Settings→Actions→Variables に6項目登録 / 初回失敗→Source を GitHub Actions→再実行 / 承認済みドメイン追加 / スマホでホーム画面追加)。相対パス出力・.nojekyll をビルドで確認
+      → 残るはユーザーによる公開作業(GitHub リポジトリ作成・push・Variables 登録・Pages 有効化)と実機確認
+      ※ .env.production を一度コミット候補にしたが、API キー文字列が自動分類器にブロックされたため
+        GitHub Actions Variables 方式に変更。設定値の実ファイルは 削除用フォルダ/env.production.txt に退避
+
+★ spec 1〜8章の中核機能はフェーズ0〜9で一通り実装完了。
+   spec 9章の未確定事項(タイマー / ストリーク / リマインダー通知)は未着手。必要になったら追加検討。
 
 進捗が動いたら、このチェックリストを更新すること。

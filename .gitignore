@@ -7,7 +7,8 @@ dist-ssr
 dev-dist
 *.local
 
-# 環境変数(Firebaseの設定値を入れる。公開リポジトリに含めない)
+# 環境変数(Firebaseの設定値を入れる。リポジトリには含めない)
+# 本番ビルド(GitHub Actions)へは、リポジトリの Variables から値を渡す。
 .env
 .env.*
 !.env.example

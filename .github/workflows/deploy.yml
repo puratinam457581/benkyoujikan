@@ -1,0 +1,67 @@
+# main ブランチに push したら、自動でビルドして GitHub Pages に公開する。
+#
+# 【料金について】
+# パブリックリポジトリなら、GitHub Actions の実行時間も Pages の公開も無料。
+# プライベートリポジトリで Pages を使うには有料プランが必要なので、
+# 無料で運用するならリポジトリは Public にすること。
+# (公開されるのはアプリのコードだけ。勉強記録は各自の Firebase プロジェクト内にあり、
+#  Firestore のルールで本人しか読めないので、外からは見えない)
+
+name: GitHub Pages に公開
+
+on:
+  push:
+    branches: [main]
+  # 「Actions」タブから手動でも実行できるようにしておく(初回の再実行で使う)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 公開処理が重ならないようにする(古いほうは打ち切る)
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # package-lock.json のとおりに入れる(npm install より確実で速い)
+      - run: npm ci
+
+      # Firebase の設定値は、リポジトリの Variables(Settings → Secrets and
+      # variables → Actions → Variables)から渡す。手順は README を参照。
+      # ※これらは公開識別子で、隠すためではなくコードに直書きしないための分離。
+      #   実際のアクセス制御は Firestore のセキュリティルールが担う。
+      - run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
