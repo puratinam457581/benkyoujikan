@@ -267,6 +267,15 @@
     filter: brightness(1.15);
   }
 
+  .btn-danger {
+    background-color: transparent;
+    color: var(--color-alert);
+    border-color: var(--color-alert);
+  }
+  .btn-danger:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--color-alert) 12%, transparent);
+  }
+
   /* パネル(カード) */
   .panel {
     background-color: var(--color-panel);

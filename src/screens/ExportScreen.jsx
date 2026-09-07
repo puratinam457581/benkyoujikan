@@ -41,6 +41,12 @@ export default function ExportScreen() {
 
   async function share() {
     try {
+      // 可能なら .md ファイルとして共有(ファイルアプリ保存 / Claude へ送るのに便利)
+      const file = new File([text], `過去ログ_${todayStr()}.md`, { type: 'text/markdown' })
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: '過去ログ' })
+        return
+      }
       await navigator.share({ title: '過去ログ', text })
     } catch {
       /* 共有シートを閉じただけ等は無視 */

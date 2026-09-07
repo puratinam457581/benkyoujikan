@@ -13,6 +13,7 @@ import {
   setMaterialStyle,
   deleteTag as fbDeleteTag,
 } from './tags.js'
+import { wipeAllData } from './wipe.js'
 import {
   fetchMaster,
   fetchAppConfig,
@@ -237,6 +238,17 @@ export function DataProvider({ children }) {
     [uid],
   )
 
+  // 全データ削除(記録・タグ・スタイル・マスタ・設定)。アカウントは残す。
+  const wipeAll = useCallback(async () => {
+    await wipeAllData(uid)
+    setRecords([])
+    setTags(EMPTY_TAGS)
+    setMaterialStyles({})
+    setMaster({ items: [] })
+    loadedFor.current = null
+    await load()
+  }, [uid, load])
+
   const value = {
     records,
     tags,
@@ -258,6 +270,7 @@ export function DataProvider({ children }) {
     deleteSubject,
     seedMaterials,
     setPhaseStart,
+    wipeAll,
   }
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }

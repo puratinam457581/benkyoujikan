@@ -1,4 +1,5 @@
-import { LogOut, Sun, Moon } from 'lucide-react'
+import { useState } from 'react'
+import { LogOut, Sun, Moon, Trash2 } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
 import MaterialStylesSection from './MaterialStylesSection.jsx'
 import { useAuth } from '../auth/AuthProvider.jsx'
@@ -9,8 +10,28 @@ import { formatMinutes, formatDateLabel } from '../utils/date.js'
 export default function SettingsScreen() {
   const { user, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
-  const { records, appConfig, setPhaseStart } = useData()
+  const { records, appConfig, setPhaseStart, wipeAll } = useData()
   const totalMin = records.reduce((s, r) => s + r.minutes, 0)
+  const [wiping, setWiping] = useState(false)
+
+  async function handleWipe() {
+    if (
+      !confirm(
+        '記録・教材マスタ・タグ・設定をすべて削除します。\nこの操作は取り消せません。続けますか？',
+      )
+    )
+      return
+    if (prompt('確認のため「削除」と入力してください') !== '削除') return
+    setWiping(true)
+    try {
+      await wipeAll()
+      alert('すべてのデータを削除しました。')
+    } catch (e) {
+      alert('削除に失敗しました: ' + (e?.message || e))
+    } finally {
+      setWiping(false)
+    }
+  }
 
   return (
     <ScreenScaffold title="設定">
@@ -85,6 +106,26 @@ export default function SettingsScreen() {
       </section>
 
       <MaterialStylesSection />
+
+      {/* データの全削除 */}
+      <section className="panel px-4 py-3" style={{ borderColor: 'var(--color-alert)' }}>
+        <p className="text-xs" style={{ color: 'var(--color-alert)' }}>
+          データの全削除
+        </p>
+        <p className="mt-1 mb-2 text-[11px] leading-relaxed text-hud-faint">
+          記録・教材マスタ・タグ・色設定・フェーズ開始日をすべて消します。
+          <strong>取り消せません。</strong>アカウント自体は残ります。
+        </p>
+        <button
+          type="button"
+          className="btn btn-danger text-sm"
+          disabled={wiping}
+          onClick={handleWipe}
+        >
+          <Trash2 size={15} strokeWidth={1.75} />
+          {wiping ? '削除中…' : 'すべてのデータを削除'}
+        </button>
+      </section>
     </ScreenScaffold>
   )
 }
