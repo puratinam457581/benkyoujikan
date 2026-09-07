@@ -7,6 +7,7 @@ export const TABS = [
   { key: 'calendar', label: 'カレンダー' },
   { key: 'total', label: '総計' },
   { key: 'compare', label: '比較' },
+  { key: 'export', label: '出力' },
   { key: 'settings', label: '設定' },
 ]
 

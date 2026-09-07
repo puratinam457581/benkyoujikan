@@ -6,13 +6,17 @@ import { NumberField, TextArea, Field } from '../components/form.jsx'
 import { useData } from '../data/DataProvider.jsx'
 import { useNavigation } from '../navigation/NavigationContext.jsx'
 import { comboKey, topCombos } from '../data/tags.js'
+import { SUBJECT_ORDER } from '../data/master.js'
 import { resolveMaterialStyle, iconComponent } from '../utils/materialStyle.js'
 import { todayStr, addDaysStr, formatMinutes } from '../utils/date.js'
+
+// 重複を除いて順序を保つ
+const uniq = (arr) => [...new Set(arr.filter(Boolean))]
 
 // 記録フロー(spec 6章)。教科 → 教材 → 活動内容 の順に選び、時間を入れて保存。
 export default function RecordModal() {
   const { record, closeRecord } = useNavigation()
-  const { tags, materialStyles, records, addRecord, updateRecord } = useData()
+  const { tags, materialStyles, master, records, addRecord, updateRecord } = useData()
   const p = record.prefill || {}
   const editingId = p.id || null
 
@@ -26,12 +30,32 @@ export default function RecordModal() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const materialOptions = subject ? tags.materials?.[subject] || [] : []
+  // 教科の候補: 基本4教科 + マスタ + タグ履歴
+  const subjectOptions = useMemo(
+    () =>
+      uniq([
+        ...SUBJECT_ORDER,
+        ...(master?.items || []).map((it) => it.subject),
+        ...(tags.subjects || []),
+      ]),
+    [master, tags.subjects],
+  )
+
+  // 教材の候補: マスタ(選択中の教科) + タグ履歴
+  const materialOptions = useMemo(() => {
+    if (!subject) return []
+    return uniq([
+      ...(master?.items || []).filter((it) => it.subject === subject).map((it) => it.name),
+      ...(tags.materials?.[subject] || []),
+    ])
+  }, [subject, master, tags.materials])
+
   const activityOptions =
     subject && material ? tags.activities?.[comboKey(subject, material)] || [] : []
 
   const totalMin = (parseInt(hours, 10) || 0) * 60 + (parseInt(minutes, 10) || 0)
-  const canSave = subject && material && activity && totalMin > 0 && !saving
+  // 活動内容は任意(学習管理システムの出力は教科+教材までしか使わないため)
+  const canSave = subject && material && totalMin > 0 && !saving
 
   const shortcuts = useMemo(() => topCombos(tags, 6), [tags])
   const last = records[0] || null
@@ -134,7 +158,7 @@ export default function RecordModal() {
       <TagChips
         label="教科"
         required
-        options={tags.subjects || []}
+        options={subjectOptions}
         value={subject}
         onChange={onSubjectChange}
         addPlaceholder="例: 英語"
@@ -152,8 +176,7 @@ export default function RecordModal() {
       />
 
       <TagChips
-        label="活動内容"
-        required
+        label="活動内容(任意)"
         options={activityOptions}
         value={activity}
         onChange={setActivity}

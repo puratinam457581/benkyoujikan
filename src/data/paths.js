@@ -22,3 +22,14 @@ export function tagsDoc(uid) {
 export function materialStylesDoc(uid) {
   return doc(db, 'users', uid, 'meta', 'materialStyles')
 }
+
+// 教材マスタ(学習管理システム連携): users/{uid}/meta/materials
+//   { items: [{ id, subject, name, done, createdAt }], updatedAt }
+export function masterDoc(uid) {
+  return doc(db, 'users', uid, 'meta', 'materials')
+}
+
+// アプリ設定(現在フェーズ開始日など): users/{uid}/meta/appConfig
+export function appConfigDoc(uid) {
+  return doc(db, 'users', uid, 'meta', 'appConfig')
+}

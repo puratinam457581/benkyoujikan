@@ -4,12 +4,12 @@ import MaterialStylesSection from './MaterialStylesSection.jsx'
 import { useAuth } from '../auth/AuthProvider.jsx'
 import { useTheme } from '../theme/ThemeProvider.jsx'
 import { useData } from '../data/DataProvider.jsx'
-import { formatMinutes } from '../utils/date.js'
+import { formatMinutes, formatDateLabel } from '../utils/date.js'
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
-  const { records } = useData()
+  const { records, appConfig, setPhaseStart } = useData()
   const totalMin = records.reduce((s, r) => s + r.minutes, 0)
 
   return (
@@ -62,6 +62,26 @@ export default function SettingsScreen() {
         <p className="mt-2 text-xs text-hud-faint">
           選んだテーマはこの端末に保存され、次回起動時も同じ表示になります。
         </p>
+      </section>
+
+      {/* 学習管理システム連携 */}
+      <section className="panel px-4 py-3">
+        <p className="text-xs text-hud-dim">現在フェーズ開始日</p>
+        <p className="mt-1 mb-2 text-[11px] leading-relaxed text-hud-faint">
+          過去ログ出力の「現在フェーズの累計」の起点。学習フェーズが切り替わったら
+          （例: 10/1, 10/26）ここを更新してください。
+        </p>
+        <input
+          type="date"
+          value={appConfig.phaseStart || ''}
+          onChange={(e) => e.target.value && setPhaseStart(e.target.value)}
+          className="field-input font-digit w-44"
+        />
+        {appConfig.phaseStart && (
+          <p className="mt-1 text-[11px] text-hud-faint">
+            {formatDateLabel(appConfig.phaseStart)} から
+          </p>
+        )}
       </section>
 
       <MaterialStylesSection />

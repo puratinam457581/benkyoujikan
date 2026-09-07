@@ -44,6 +44,13 @@ export function formatHoursShort(min) {
   return `${Number(h.toFixed(1))}h`
 }
 
+// 分 → 過去ログ出力用の「12.5h」形式(0 は「0h」、それ以外は小数1桁固定)
+export function formatHoursLog(min) {
+  const m = Math.max(0, min || 0)
+  if (m === 0) return '0h'
+  return `${(m / 60).toFixed(1)}h`
+}
+
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
 
 // 'YYYY-MM-DD' → 「9月7日(日)」

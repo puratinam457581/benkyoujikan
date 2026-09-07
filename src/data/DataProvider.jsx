@@ -13,17 +13,33 @@ import {
   setMaterialStyle,
   deleteTag as fbDeleteTag,
 } from './tags.js'
+import {
+  fetchMaster,
+  fetchAppConfig,
+  reconcileMaster,
+  addMasterMaterial as fbAddMaster,
+  setMaterialDone as fbSetDone,
+  renameMasterMaterial as fbRename,
+  deleteMasterMaterial as fbDeleteMaster,
+  deleteMasterSubject as fbDeleteMasterSubject,
+  seedMasterMaterials as fbSeedMaster,
+  setPhaseStart as fbSetPhaseStart,
+} from './master.js'
 
 const DataContext = createContext(null)
 
-// ログイン後、記録・タグ履歴・教材スタイルを起動時に1回読み込み、
+const EMPTY_TAGS = { subjects: [], materials: {}, activities: {}, combos: [] }
+
+// ログイン後、記録・タグ履歴・教材スタイル・教材マスタ・設定を起動時に1回読み込み、
 // メモリ上の state として保持する(spec 4章: リアルタイム同期はしない)。
 // 追加/編集/削除は Firestore に書いてから state を更新する。
 export function DataProvider({ children }) {
   const { uid } = useAuth()
   const [records, setRecords] = useState([])
-  const [tags, setTags] = useState({ subjects: [], materials: {}, activities: {}, combos: [] })
+  const [tags, setTags] = useState(EMPTY_TAGS)
   const [materialStyles, setMaterialStyles] = useState({})
+  const [master, setMaster] = useState({ items: [] })
+  const [appConfig, setAppConfig] = useState({ phaseStart: '' })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const loadedFor = useRef(null)
@@ -33,14 +49,20 @@ export function DataProvider({ children }) {
     setLoading(true)
     setError('')
     try {
-      const [r, t, s] = await Promise.all([
+      const [r, t, s, m, cfg] = await Promise.all([
         fetchAllRecords(uid),
         fetchTags(uid),
         fetchMaterialStyles(uid),
+        fetchMaster(uid),
+        fetchAppConfig(uid),
       ])
       setRecords(r)
       setTags(t)
       setMaterialStyles(s)
+      setAppConfig(cfg)
+      // 記録・タグに出てくる教材でマスタに無いものを取り込む(非破壊)
+      const { master: m2 } = await reconcileMaster(uid, m, r, t)
+      setMaster(m2)
       loadedFor.current = uid
     } catch (e) {
       setError(e?.message || 'データの読み込みに失敗しました')
@@ -52,8 +74,10 @@ export function DataProvider({ children }) {
   useEffect(() => {
     if (!uid) {
       setRecords([])
-      setTags({ subjects: [], materials: {}, activities: {}, combos: [] })
+      setTags(EMPTY_TAGS)
       setMaterialStyles({})
+      setMaster({ items: [] })
+      setAppConfig({ phaseStart: '' })
       setLoading(false)
       loadedFor.current = null
       return
@@ -70,16 +94,24 @@ export function DataProvider({ children }) {
           a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt,
         ),
       )
-      // タグ履歴・よく使う組み合わせも更新
       try {
         const nextTags = await recordTagUsage(uid, input)
         setTags(nextTags)
       } catch {
         /* 履歴更新の失敗は記録本体を妨げない */
       }
+      // 記録した教材がマスタに無ければ足す
+      if (input.subject && input.material) {
+        try {
+          const next = await fbAddMaster(uid, input.subject, input.material, master)
+          if (next !== master) setMaster(next)
+        } catch {
+          /* マスタ更新の失敗は記録本体を妨げない */
+        }
+      }
       return rec
     },
-    [uid],
+    [uid, master],
   )
 
   const updateRecord = useCallback(
@@ -92,17 +124,24 @@ export function DataProvider({ children }) {
             a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt - a.createdAt,
           ),
       )
-      // 教科/教材/活動を変更した場合、その組み合わせも履歴に残す
       if (patch.subject && patch.material && patch.activity) {
         try {
           const nextTags = await recordTagUsage(uid, patch)
           setTags(nextTags)
         } catch {
-          /* 履歴更新の失敗は編集本体を妨げない */
+          /* noop */
+        }
+      }
+      if (patch.subject && patch.material) {
+        try {
+          const next = await fbAddMaster(uid, patch.subject, patch.material, master)
+          if (next !== master) setMaster(next)
+        } catch {
+          /* noop */
         }
       }
     },
-    [uid],
+    [uid, master],
   )
 
   const deleteRecord = useCallback(
@@ -122,8 +161,6 @@ export function DataProvider({ children }) {
     [uid],
   )
 
-  // 候補(タグ履歴)から削除。target は { subject } / { subject, material } /
-  // { subject, material, activity } のいずれか。過去の記録は消さない。
   const deleteTag = useCallback(
     async (target) => {
       const { tags: nextTags, materialStyles: nextStyles } = await fbDeleteTag(uid, target)
@@ -133,10 +170,79 @@ export function DataProvider({ children }) {
     [uid],
   )
 
+  // ---- 教材マスタの操作 --------------------------------------------
+  const addMaterial = useCallback(
+    async (subject, name) => {
+      const next = await fbAddMaster(uid, subject, name, master)
+      setMaster(next)
+    },
+    [uid, master],
+  )
+  const setMaterialDone = useCallback(
+    async (id, done) => {
+      setMaster(await fbSetDone(uid, id, done, master))
+    },
+    [uid, master],
+  )
+  const renameMaterial = useCallback(
+    async (id, name) => {
+      setMaster(await fbRename(uid, id, name, master))
+    },
+    [uid, master],
+  )
+  // マスタから教材を削除。タグ履歴・色設定・組み合わせも合わせて掃除する。
+  const deleteMaterial = useCallback(
+    async (id) => {
+      const item = master.items.find((it) => it.id === id)
+      const next = await fbDeleteMaster(uid, id, master)
+      setMaster(next)
+      if (item) {
+        try {
+          const { tags: nt, materialStyles: ns } = await fbDeleteTag(uid, {
+            subject: item.subject,
+            material: item.name,
+          })
+          setTags(nt)
+          setMaterialStyles(ns)
+        } catch {
+          /* noop */
+        }
+      }
+    },
+    [uid, master],
+  )
+  const deleteSubject = useCallback(
+    async (subject) => {
+      const next = await fbDeleteMasterSubject(uid, subject, master)
+      setMaster(next)
+      try {
+        const { tags: nt, materialStyles: ns } = await fbDeleteTag(uid, { subject })
+        setTags(nt)
+        setMaterialStyles(ns)
+      } catch {
+        /* noop */
+      }
+    },
+    [uid, master],
+  )
+  const seedMaterials = useCallback(async () => {
+    setMaster(await fbSeedMaster(uid, master))
+  }, [uid, master])
+
+  const setPhaseStart = useCallback(
+    async (dateStr) => {
+      await fbSetPhaseStart(uid, dateStr)
+      setAppConfig((prev) => ({ ...prev, phaseStart: dateStr }))
+    },
+    [uid],
+  )
+
   const value = {
     records,
     tags,
     materialStyles,
+    master,
+    appConfig,
     loading,
     error,
     reload: load,
@@ -145,6 +251,13 @@ export function DataProvider({ children }) {
     deleteRecord,
     updateMaterialStyle,
     deleteTag,
+    addMaterial,
+    setMaterialDone,
+    renameMaterial,
+    deleteMaterial,
+    deleteSubject,
+    seedMaterials,
+    setPhaseStart,
   }
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }

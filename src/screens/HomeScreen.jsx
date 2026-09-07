@@ -1,4 +1,4 @@
-import { ChartColumn, CalendarDays, Scale, ChevronRight } from 'lucide-react'
+import { ChartColumn, CalendarDays, Scale, FileText, ChevronRight } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
 import SubjectBreakdown from '../components/SubjectBreakdown.jsx'
 import RecordRow from '../components/RecordRow.jsx'
@@ -8,6 +8,7 @@ import { recordsOnDate, sumMinutes } from '../utils/aggregate.js'
 import { todayStr, formatDateLabel, formatMinutes } from '../utils/date.js'
 
 const LINKS = [
+  { tab: 'export', label: '学習計画用のログを出力', icon: FileText, accent: true },
   { tab: 'total', label: '総勉強時間', icon: ChartColumn },
   { tab: 'calendar', label: 'カレンダー', icon: CalendarDays },
   { tab: 'compare', label: '前の期間と比較', icon: Scale },
@@ -59,15 +60,21 @@ export default function HomeScreen() {
 
       {/* 他画面への導線 */}
       <section className="flex flex-col gap-2">
-        {LINKS.map(({ tab, label, icon: Icon }) => (
+        {LINKS.map(({ tab, label, icon: Icon, accent }) => (
           <button
             key={tab}
             type="button"
             onClick={() => setTab(tab)}
-            className="panel flex items-center gap-3 px-4 py-3 text-left hover:brightness-110"
+            className={`panel flex items-center gap-3 px-4 py-3 text-left hover:brightness-110 ${
+              accent ? 'border-cyan' : ''
+            }`}
           >
             <Icon size={18} strokeWidth={1.5} className="shrink-0 text-cyan" />
-            <span className="flex-1 text-sm text-hud">{label}</span>
+            <span
+              className={`flex-1 text-sm ${accent ? 'font-semibold text-cyan' : 'text-hud'}`}
+            >
+              {label}
+            </span>
             <ChevronRight size={16} strokeWidth={1.5} className="shrink-0 text-hud-faint" />
           </button>
         ))}

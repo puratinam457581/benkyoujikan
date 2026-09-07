@@ -23,7 +23,7 @@ export default function RecordRow({ record: r, showDate = true }) {
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm text-hud">
-          {r.subject}・{r.material}・{r.activity}
+          {[r.subject, r.material, r.activity].filter(Boolean).join('・')}
         </p>
         <p className="text-[11px] text-hud-faint">
           {showDate ? `${r.date}・` : ''}
