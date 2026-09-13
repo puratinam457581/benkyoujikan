@@ -59,6 +59,12 @@ export function formatDateLabel(s) {
   return `${d.getMonth() + 1}月${d.getDate()}日(${WEEKDAYS[d.getDay()]})`
 }
 
+// 'YYYY-MM-DD' → 「09/07(日)」(過去ログの表など、狭い場所向け)
+export function formatShortDate(s) {
+  const d = fromDateStr(s)
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())}(${WEEKDAYS[d.getDay()]})`
+}
+
 // その週の月曜の 'YYYY-MM-DD'(週の始まりを月曜とする)
 export function startOfWeekStr(s = todayStr()) {
   const d = fromDateStr(s)

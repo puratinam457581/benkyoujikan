@@ -9,13 +9,13 @@ import { formatDateLabel, addDaysStr, todayStr } from '../utils/date.js'
 // 過去ログ出力(学習管理システム連携)。
 // 毎朝これを iPad/iPhone の Claude に渡すと、今日の学習計画を作ってもらえる。
 export default function ExportScreen() {
-  const { records, master, appConfig, loading } = useData()
+  const { records, master, appConfig, diary, loading } = useData()
   const { setTab } = useNavigation()
   const [copied, setCopied] = useState(false)
 
   const text = useMemo(
-    () => buildExportLog(records, master, appConfig),
-    [records, master, appConfig],
+    () => buildExportLog(records, master, appConfig, diary),
+    [records, master, appConfig, diary],
   )
 
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
@@ -58,7 +58,7 @@ export default function ExportScreen() {
       <p className="text-sm leading-relaxed text-hud-dim">
         毎朝これをコピーして、iPad/iPhone の Claude（学習計画のプロジェクト）に貼り付けると、
         今日の学習計画を作ってもらえます。対象は <span className="font-digit">{yesterday}</span>{' '}
-        まで（当日ぶんは含みません）。
+        まで（当日ぶんは含みません）。直近7日間の推移と、前日の日記(書いていれば)も含みます。
       </p>
 
       <div className="flex flex-wrap gap-2">

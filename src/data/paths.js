@@ -33,3 +33,12 @@ export function masterDoc(uid) {
 export function appConfigDoc(uid) {
   return doc(db, 'users', uid, 'meta', 'appConfig')
 }
+
+// 日記(任意記入)のコレクション: users/{uid}/diary/{date}
+//   ドキュメントIDが 'YYYY-MM-DD'。{ text, updatedAt }
+export function diaryCol(uid) {
+  return collection(db, 'users', uid, 'diary')
+}
+export function diaryDoc(uid, date) {
+  return doc(db, 'users', uid, 'diary', date)
+}

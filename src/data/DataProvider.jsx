@@ -14,6 +14,7 @@ import {
   deleteTag as fbDeleteTag,
 } from './tags.js'
 import { wipeAllData } from './wipe.js'
+import { fetchAllDiary, saveDiaryEntry as fbSaveDiaryEntry } from './diary.js'
 import {
   fetchMaster,
   fetchAppConfig,
@@ -41,6 +42,7 @@ export function DataProvider({ children }) {
   const [materialStyles, setMaterialStyles] = useState({})
   const [master, setMaster] = useState({ items: [] })
   const [appConfig, setAppConfig] = useState({ phaseStart: '' })
+  const [diary, setDiary] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const loadedFor = useRef(null)
@@ -50,17 +52,19 @@ export function DataProvider({ children }) {
     setLoading(true)
     setError('')
     try {
-      const [r, t, s, m, cfg] = await Promise.all([
+      const [r, t, s, m, cfg, dy] = await Promise.all([
         fetchAllRecords(uid),
         fetchTags(uid),
         fetchMaterialStyles(uid),
         fetchMaster(uid),
         fetchAppConfig(uid),
+        fetchAllDiary(uid),
       ])
       setRecords(r)
       setTags(t)
       setMaterialStyles(s)
       setAppConfig(cfg)
+      setDiary(dy)
       // 記録・タグに出てくる教材でマスタに無いものを取り込む(非破壊)
       const { master: m2 } = await reconcileMaster(uid, m, r, t)
       setMaster(m2)
@@ -79,6 +83,7 @@ export function DataProvider({ children }) {
       setMaterialStyles({})
       setMaster({ items: [] })
       setAppConfig({ phaseStart: '' })
+      setDiary({})
       setLoading(false)
       loadedFor.current = null
       return
@@ -238,13 +243,29 @@ export function DataProvider({ children }) {
     [uid],
   )
 
-  // 全データ削除(記録・タグ・スタイル・マスタ・設定)。アカウントは残す。
+  // ---- 日記(任意) ----------------------------------------------------
+  // 空文字で保存するとその日の日記を削除する(「書かない」を選べるように)。
+  const setDiaryEntry = useCallback(
+    async (date, text) => {
+      const saved = await fbSaveDiaryEntry(uid, date, text)
+      setDiary((prev) => {
+        const next = { ...prev }
+        if (saved === null) delete next[date]
+        else next[date] = saved
+        return next
+      })
+    },
+    [uid],
+  )
+
+  // 全データ削除(記録・タグ・スタイル・マスタ・設定・日記)。アカウントは残す。
   const wipeAll = useCallback(async () => {
     await wipeAllData(uid)
     setRecords([])
     setTags(EMPTY_TAGS)
     setMaterialStyles({})
     setMaster({ items: [] })
+    setDiary({})
     loadedFor.current = null
     await load()
   }, [uid, load])
@@ -255,6 +276,7 @@ export function DataProvider({ children }) {
     materialStyles,
     master,
     appConfig,
+    diary,
     loading,
     error,
     reload: load,
@@ -270,6 +292,7 @@ export function DataProvider({ children }) {
     deleteSubject,
     seedMaterials,
     setPhaseStart,
+    setDiaryEntry,
     wipeAll,
   }
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

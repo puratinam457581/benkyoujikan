@@ -2,6 +2,7 @@ import { ChartColumn, CalendarDays, Scale, FileText, ChevronRight } from 'lucide
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
 import SubjectBreakdown from '../components/SubjectBreakdown.jsx'
 import RecordRow from '../components/RecordRow.jsx'
+import DiaryCard from '../components/DiaryCard.jsx'
 import { useData } from '../data/DataProvider.jsx'
 import { useNavigation } from '../navigation/NavigationContext.jsx'
 import { recordsOnDate, sumMinutes } from '../utils/aggregate.js'
@@ -57,6 +58,9 @@ export default function HomeScreen() {
           </div>
         </section>
       )}
+
+      {/* 今日の日記(任意) */}
+      <DiaryCard date={today} title="今日の日記(任意)" />
 
       {/* 他画面への導線 */}
       <section className="flex flex-col gap-2">

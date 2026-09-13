@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
 import SubjectBreakdown from '../components/SubjectBreakdown.jsx'
 import RecordRow from '../components/RecordRow.jsx'
+import DiaryCard from '../components/DiaryCard.jsx'
 import { useData } from '../data/DataProvider.jsx'
 import { minutesByDate, recordsOnDate } from '../utils/aggregate.js'
 import {
@@ -159,6 +160,9 @@ export default function CalendarScreen() {
           </>
         )}
       </section>
+
+      {/* この日の日記(任意)。記録の有無に関わらず書ける */}
+      {selected && <DiaryCard date={selected} title={`${formatDateLabel(selected)}の日記(任意)`} />}
     </ScreenScaffold>
   )
 }
