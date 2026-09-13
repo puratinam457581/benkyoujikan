@@ -8,6 +8,7 @@ import { useNavigation } from '../navigation/NavigationContext.jsx'
 import { comboKey, topCombos } from '../data/tags.js'
 import { SUBJECT_ORDER } from '../data/master.js'
 import { resolveMaterialStyle, iconComponent } from '../utils/materialStyle.js'
+import { materialProgress } from '../utils/progress.js'
 import { todayStr, addDaysStr, formatMinutes } from '../utils/date.js'
 
 // 重複を除いて順序を保つ
@@ -27,6 +28,7 @@ export default function RecordModal() {
   const [minutes, setMinutes] = useState(p.minutes ? String(p.minutes % 60) : '')
   const [dateStr, setDateStr] = useState(p.date || todayStr())
   const [memo, setMemo] = useState(p.memo || '')
+  const [progress, setProgress] = useState(p.progress != null ? String(p.progress) : '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -53,6 +55,17 @@ export default function RecordModal() {
   const activityOptions =
     subject && material ? tags.activities?.[comboKey(subject, material)] || [] : []
 
+  // 選んだ教材が進捗(任意)を設定していれば、記録と一緒に進捗も更新できるようにする
+  const materialItem = useMemo(
+    () => (master?.items || []).find((it) => it.subject === subject && it.name === material) || null,
+    [master, subject, material],
+  )
+  const progressInfo = useMemo(() => {
+    if (!materialItem) return null
+    const others = editingId ? records.filter((r) => r.id !== editingId) : records
+    return materialProgress(others, materialItem)
+  }, [materialItem, records, editingId])
+
   const totalMin = (parseInt(hours, 10) || 0) * 60 + (parseInt(minutes, 10) || 0)
   // 活動内容は任意(学習管理システムの出力は教科+教材までしか使わないため)
   const canSave = subject && material && totalMin > 0 && !saving
@@ -64,16 +77,19 @@ export default function RecordModal() {
     setSubject(c.subject)
     setMaterial(c.material)
     setActivity(c.activity)
+    setProgress('')
   }
 
   function onSubjectChange(v) {
     setSubject(v)
     setMaterial('')
     setActivity('')
+    setProgress('')
   }
   function onMaterialChange(v) {
     setMaterial(v)
     setActivity('')
+    setProgress('')
   }
 
   async function save() {
@@ -87,6 +103,7 @@ export default function RecordModal() {
       minutes: totalMin,
       date: dateStr,
       memo: memo.trim(),
+      progress: progress === '' ? undefined : Number(progress),
     }
     try {
       if (editingId) {
@@ -236,6 +253,17 @@ export default function RecordModal() {
           </button>
         </div>
       </Field>
+
+      {progressInfo && (
+        <NumberField
+          label="現在の進捗(任意)"
+          value={progress}
+          onChange={setProgress}
+          min={0}
+          unit={progressInfo.unit}
+          hint={`前回: ${progressInfo.current}${progressInfo.unit} / 全${progressInfo.total}${progressInfo.unit}`}
+        />
+      )}
 
       <TextArea
         label="メモ(任意)"

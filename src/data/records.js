@@ -19,6 +19,8 @@ function toRecord(snap) {
     minutes: Number(d.minutes) || 0,
     date: d.date ?? '',
     memo: d.memo ?? '',
+    // その教材の進捗(任意。設定している教材だけ入力できる。単位は教材ごとに自由)
+    progress: Number.isFinite(d.progress) ? d.progress : null,
     createdAt: d.createdAt ?? 0,
     updatedAt: d.updatedAt ?? 0,
   }
@@ -26,6 +28,7 @@ function toRecord(snap) {
 
 // 入力値を Firestore に入れる形に整える
 function normalize(input) {
+  const p = Number(input.progress)
   return {
     subject: String(input.subject ?? '').trim(),
     material: String(input.material ?? '').trim(),
@@ -33,6 +36,11 @@ function normalize(input) {
     minutes: Math.max(0, Math.round(Number(input.minutes) || 0)),
     date: String(input.date ?? '').trim(),
     memo: String(input.memo ?? '').trim(),
+    progress: input.progress === undefined || input.progress === '' || input.progress === null
+      ? null
+      : Number.isFinite(p)
+        ? p
+        : null,
   }
 }
 
@@ -57,7 +65,7 @@ export async function updateRecord(uid, id, patch) {
   const data = { ...normalize({ ...patch }), updatedAt: Date.now() }
   // patch に含まれないキーは normalize が空文字/0 にしてしまうので、
   // 実際に渡されたキーだけを残す
-  const keys = ['subject', 'material', 'activity', 'minutes', 'date', 'memo']
+  const keys = ['subject', 'material', 'activity', 'minutes', 'date', 'memo', 'progress']
   const out = { updatedAt: data.updatedAt }
   for (const k of keys) {
     if (k in patch) out[k] = data[k]

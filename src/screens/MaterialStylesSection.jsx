@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Trash2, Check, Plus, Sparkles } from 'lucide-react'
 import { useData } from '../data/DataProvider.jsx'
 import { comboKey } from '../data/tags.js'
-import { subjectRank, estimateRemainingMinutes } from '../data/master.js'
+import { subjectRank } from '../data/master.js'
 import { minutesForCombo } from '../utils/aggregate.js'
-import { formatHoursLog } from '../utils/date.js'
+import { materialProgress } from '../utils/progress.js'
+import { formatHoursLog, todayStr } from '../utils/date.js'
 import {
   PRESET_COLORS,
   MATERIAL_ICON_NAMES,
@@ -13,29 +14,28 @@ import {
 } from '../utils/materialStyle.js'
 import { readableTextOn } from '../utils/color.js'
 
-// 教材ごとの進捗(任意)。単位はバラバラ(章/問/%)なので自由入力。
-// 「現在地点」は上書き入力。2回以上更新すると、その間の時間から自動でペース→残り時間を出す。
+// 教材ごとの進捗(任意)。単位はバラバラ(ページ/レッスン/回など)なので自由入力。
+// 現在地点は基本、記録(RecordModal)のたびに任意で更新される。ここ(設定画面)では
+// 単位/総量の設定と、ズレたときの基準値の補正だけを行う。
 function ProgressEditor({ item }) {
   const { records, setMaterialProgress, clearMaterialProgress } = useData()
-  const [mode, setMode] = useState(null) // null | 'setup' | 'update'
+  const [mode, setMode] = useState(null) // null | 'setup' | 'rebase'
   const [unit, setUnit] = useState(item.unit || '')
   const [total, setTotal] = useState(item.total ?? '')
-  const [current, setCurrent] = useState(item.current ?? '')
+  const [baselineCurrent, setBaselineCurrent] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const hasProgress = Boolean(item.unit) && Number.isFinite(item.total)
-  const remaining = hasProgress ? Math.max(0, (item.total || 0) - (item.current || 0)) : null
-  const remainingMinutes = hasProgress ? estimateRemainingMinutes(item) : null
+  const progress = materialProgress(records, item)
 
   function openSetup() {
     setUnit(item.unit || '')
     setTotal(item.total ?? '')
-    setCurrent(item.current ?? '')
+    setBaselineCurrent(progress ? String(progress.current) : '')
     setMode('setup')
   }
-  function openUpdate() {
-    setCurrent(item.current ?? '')
-    setMode('update')
+  function openRebase() {
+    setBaselineCurrent(progress ? String(progress.current) : '')
+    setMode('rebase')
   }
 
   async function saveSetup() {
@@ -45,21 +45,27 @@ function ProgressEditor({ item }) {
     setSaving(true)
     try {
       const minutesNow = minutesForCombo(records, item.subject, item.name)
-      const c = current === '' ? undefined : Number(current)
-      await setMaterialProgress(item.id, { unit: u, total: t, current: c, minutesNow })
+      const c = baselineCurrent === '' ? undefined : Number(baselineCurrent)
+      await setMaterialProgress(item.id, {
+        unit: u,
+        total: t,
+        baselineCurrent: c,
+        minutesNow,
+        date: todayStr(),
+      })
       setMode(null)
     } finally {
       setSaving(false)
     }
   }
 
-  async function saveUpdate() {
-    const c = Number(current)
+  async function saveRebase() {
+    const c = Number(baselineCurrent)
     if (!Number.isFinite(c)) return
     setSaving(true)
     try {
       const minutesNow = minutesForCombo(records, item.subject, item.name)
-      await setMaterialProgress(item.id, { current: c, minutesNow })
+      await setMaterialProgress(item.id, { baselineCurrent: c, minutesNow, date: todayStr() })
       setMode(null)
     } finally {
       setSaving(false)
@@ -79,7 +85,7 @@ function ProgressEditor({ item }) {
         <div className="flex flex-col gap-2">
           <input
             className="field-input"
-            placeholder="単位(例: 章, 問, %)"
+            placeholder="単位(例: ページ, レッスン, 回)"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
           />
@@ -94,11 +100,14 @@ function ProgressEditor({ item }) {
             <input
               className="field-input"
               type="number"
-              placeholder="現在地点"
-              value={current}
-              onChange={(e) => setCurrent(e.target.value)}
+              placeholder="現在地点(任意)"
+              value={baselineCurrent}
+              onChange={(e) => setBaselineCurrent(e.target.value)}
             />
           </div>
+          <p className="text-[11px] text-hud-faint">
+            以降は記録を保存するときに、この教材の進捗を任意で更新できます。
+          </p>
           <div className="flex gap-2">
             <button type="button" className="btn btn-primary text-sm" disabled={saving} onClick={saveSetup}>
               {saving ? '保存中…' : '保存'}
@@ -108,18 +117,21 @@ function ProgressEditor({ item }) {
             </button>
           </div>
         </div>
-      ) : mode === 'update' ? (
+      ) : mode === 'rebase' ? (
         <div className="flex flex-col gap-2">
           <input
             autoFocus
             className="field-input"
             type="number"
             placeholder={`現在地点(${item.unit})`}
-            value={current}
-            onChange={(e) => setCurrent(e.target.value)}
+            value={baselineCurrent}
+            onChange={(e) => setBaselineCurrent(e.target.value)}
           />
+          <p className="text-[11px] text-hud-faint">
+            記録の付け忘れなどでズレたときの補正用。ペースの起点もここにリセットされます。
+          </p>
           <div className="flex gap-2">
-            <button type="button" className="btn btn-primary text-sm" disabled={saving} onClick={saveUpdate}>
+            <button type="button" className="btn btn-primary text-sm" disabled={saving} onClick={saveRebase}>
               {saving ? '保存中…' : '保存'}
             </button>
             <button type="button" className="btn btn-ghost text-sm" onClick={() => setMode(null)}>
@@ -127,21 +139,21 @@ function ProgressEditor({ item }) {
             </button>
           </div>
         </div>
-      ) : hasProgress ? (
+      ) : progress ? (
         <div>
           <p className="text-sm text-hud">
-            {item.current ?? 0} / {item.total}
-            {item.unit}(残り{remaining}
-            {item.unit})
+            {progress.current} / {progress.total}
+            {progress.unit}(残り{progress.remaining}
+            {progress.unit})
           </p>
           <p className="mt-0.5 text-[11px] text-hud-faint">
-            {remainingMinutes == null
-              ? 'あと1回「現在地点を更新」すると、直近のペースから残り時間の目安が出ます'
-              : `直近のペースなら残り約${formatHoursLog(remainingMinutes)}`}
+            {progress.remainingMinutes == null
+              ? '記録に進捗の変化があると、直近のペースから残り時間の目安が出ます'
+              : `直近のペースなら残り約${formatHoursLog(progress.remainingMinutes)}`}
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <button type="button" className="chip px-2.5 py-1 text-[11px]" onClick={openUpdate}>
-              現在地点を更新
+            <button type="button" className="chip px-2.5 py-1 text-[11px]" onClick={openRebase}>
+              現在地点を補正
             </button>
             <button type="button" className="chip px-2.5 py-1 text-[11px]" onClick={openSetup}>
               単位/総量を編集
