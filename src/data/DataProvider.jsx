@@ -26,6 +26,8 @@ import {
   deleteMasterSubject as fbDeleteMasterSubject,
   seedMasterMaterials as fbSeedMaster,
   setPhaseStart as fbSetPhaseStart,
+  setMaterialProgress as fbSetProgress,
+  clearMaterialProgress as fbClearProgress,
 } from './master.js'
 
 const DataContext = createContext(null)
@@ -234,6 +236,19 @@ export function DataProvider({ children }) {
   const seedMaterials = useCallback(async () => {
     setMaster(await fbSeedMaster(uid, master))
   }, [uid, master])
+  // 進捗(任意)。current を渡すと progressHistory に積まれ、2回目以降でペースが出せる
+  const setMaterialProgress = useCallback(
+    async (id, patch) => {
+      setMaster(await fbSetProgress(uid, id, patch, master))
+    },
+    [uid, master],
+  )
+  const clearMaterialProgress = useCallback(
+    async (id) => {
+      setMaster(await fbClearProgress(uid, id, master))
+    },
+    [uid, master],
+  )
 
   const setPhaseStart = useCallback(
     async (dateStr) => {
@@ -291,6 +306,8 @@ export function DataProvider({ children }) {
     deleteMaterial,
     deleteSubject,
     seedMaterials,
+    setMaterialProgress,
+    clearMaterialProgress,
     setPhaseStart,
     setDiaryEntry,
     wipeAll,

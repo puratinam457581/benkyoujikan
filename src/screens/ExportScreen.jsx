@@ -58,7 +58,8 @@ export default function ExportScreen() {
       <p className="text-sm leading-relaxed text-hud-dim">
         毎朝これをコピーして、iPad/iPhone の Claude（学習計画のプロジェクト）に貼り付けると、
         今日の学習計画を作ってもらえます。対象は <span className="font-digit">{yesterday}</span>{' '}
-        まで（当日ぶんは含みません）。直近7日間の推移と、前日の日記(書いていれば)も含みます。
+        まで（当日ぶんは含みません）。直近7日間の推移、前日の日記(書いていれば)、
+        設定した教材の進捗(残り分量・残り時間の目安)も含みます。
       </p>
 
       <div className="flex flex-wrap gap-2">

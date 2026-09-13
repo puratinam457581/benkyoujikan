@@ -79,6 +79,15 @@ export function studyStats(records) {
   }
 }
 
+// 指定の教科+教材の累計分(進捗のペース計算用)
+export function minutesForCombo(records, subject, material) {
+  let sum = 0
+  for (const r of records) {
+    if (r.subject === subject && r.material === material) sum += r.minutes || 0
+  }
+  return sum
+}
+
 // 「教科・教材・活動」ごとの集計(総計画面用)
 export function comboBreakdown(records) {
   const map = new Map()

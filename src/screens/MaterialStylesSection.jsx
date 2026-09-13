@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Trash2, Check, Plus, Sparkles } from 'lucide-react'
 import { useData } from '../data/DataProvider.jsx'
 import { comboKey } from '../data/tags.js'
-import { subjectRank } from '../data/master.js'
+import { subjectRank, estimateRemainingMinutes } from '../data/master.js'
+import { minutesForCombo } from '../utils/aggregate.js'
+import { formatHoursLog } from '../utils/date.js'
 import {
   PRESET_COLORS,
   MATERIAL_ICON_NAMES,
@@ -10,6 +12,157 @@ import {
   iconComponent,
 } from '../utils/materialStyle.js'
 import { readableTextOn } from '../utils/color.js'
+
+// 教材ごとの進捗(任意)。単位はバラバラ(章/問/%)なので自由入力。
+// 「現在地点」は上書き入力。2回以上更新すると、その間の時間から自動でペース→残り時間を出す。
+function ProgressEditor({ item }) {
+  const { records, setMaterialProgress, clearMaterialProgress } = useData()
+  const [mode, setMode] = useState(null) // null | 'setup' | 'update'
+  const [unit, setUnit] = useState(item.unit || '')
+  const [total, setTotal] = useState(item.total ?? '')
+  const [current, setCurrent] = useState(item.current ?? '')
+  const [saving, setSaving] = useState(false)
+
+  const hasProgress = Boolean(item.unit) && Number.isFinite(item.total)
+  const remaining = hasProgress ? Math.max(0, (item.total || 0) - (item.current || 0)) : null
+  const remainingMinutes = hasProgress ? estimateRemainingMinutes(item) : null
+
+  function openSetup() {
+    setUnit(item.unit || '')
+    setTotal(item.total ?? '')
+    setCurrent(item.current ?? '')
+    setMode('setup')
+  }
+  function openUpdate() {
+    setCurrent(item.current ?? '')
+    setMode('update')
+  }
+
+  async function saveSetup() {
+    const u = unit.trim()
+    const t = Number(total)
+    if (!u || !Number.isFinite(t) || t <= 0) return
+    setSaving(true)
+    try {
+      const minutesNow = minutesForCombo(records, item.subject, item.name)
+      const c = current === '' ? undefined : Number(current)
+      await setMaterialProgress(item.id, { unit: u, total: t, current: c, minutesNow })
+      setMode(null)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function saveUpdate() {
+    const c = Number(current)
+    if (!Number.isFinite(c)) return
+    setSaving(true)
+    try {
+      const minutesNow = minutesForCombo(records, item.subject, item.name)
+      await setMaterialProgress(item.id, { current: c, minutesNow })
+      setMode(null)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function clear() {
+    if (!confirm('進捗の設定を解除します(記録・累計時間は消えません)。')) return
+    await clearMaterialProgress(item.id)
+    setMode(null)
+  }
+
+  return (
+    <div className="mt-3 border-t border-line pt-3">
+      <p className="field-label mb-1.5">進捗(任意)</p>
+      {mode === 'setup' ? (
+        <div className="flex flex-col gap-2">
+          <input
+            className="field-input"
+            placeholder="単位(例: 章, 問, %)"
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <input
+              className="field-input"
+              type="number"
+              placeholder="総量"
+              value={total}
+              onChange={(e) => setTotal(e.target.value)}
+            />
+            <input
+              className="field-input"
+              type="number"
+              placeholder="現在地点"
+              value={current}
+              onChange={(e) => setCurrent(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button type="button" className="btn btn-primary text-sm" disabled={saving} onClick={saveSetup}>
+              {saving ? '保存中…' : '保存'}
+            </button>
+            <button type="button" className="btn btn-ghost text-sm" onClick={() => setMode(null)}>
+              キャンセル
+            </button>
+          </div>
+        </div>
+      ) : mode === 'update' ? (
+        <div className="flex flex-col gap-2">
+          <input
+            autoFocus
+            className="field-input"
+            type="number"
+            placeholder={`現在地点(${item.unit})`}
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+          />
+          <div className="flex gap-2">
+            <button type="button" className="btn btn-primary text-sm" disabled={saving} onClick={saveUpdate}>
+              {saving ? '保存中…' : '保存'}
+            </button>
+            <button type="button" className="btn btn-ghost text-sm" onClick={() => setMode(null)}>
+              キャンセル
+            </button>
+          </div>
+        </div>
+      ) : hasProgress ? (
+        <div>
+          <p className="text-sm text-hud">
+            {item.current ?? 0} / {item.total}
+            {item.unit}(残り{remaining}
+            {item.unit})
+          </p>
+          <p className="mt-0.5 text-[11px] text-hud-faint">
+            {remainingMinutes == null
+              ? 'あと1回「現在地点を更新」すると、直近のペースから残り時間の目安が出ます'
+              : `直近のペースなら残り約${formatHoursLog(remainingMinutes)}`}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" className="chip px-2.5 py-1 text-[11px]" onClick={openUpdate}>
+              現在地点を更新
+            </button>
+            <button type="button" className="chip px-2.5 py-1 text-[11px]" onClick={openSetup}>
+              単位/総量を編集
+            </button>
+            <button
+              type="button"
+              className="chip px-2.5 py-1 text-[11px] text-alert"
+              onClick={clear}
+            >
+              解除
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="chip px-2.5 py-1 text-[11px]" onClick={openSetup}>
+          進捗を設定
+        </button>
+      )}
+    </div>
+  )
+}
 
 // 教材マスタ(学習管理システム連携)。
 // 教科ごとに教材を並べ、色/アイコン・完了フラグ・削除・活動内容の整理を行う。
@@ -245,6 +398,8 @@ export default function MaterialStylesSection() {
                             </>
                           )}
 
+                          <ProgressEditor item={it} />
+
                           <button
                             type="button"
                             onClick={() => {
@@ -257,7 +412,7 @@ export default function MaterialStylesSection() {
                                 deleteMaterial(it.id)
                               }
                             }}
-                            className="flex items-center gap-1.5 rounded-sharp border border-line px-3 py-1.5 text-xs text-alert"
+                            className="mt-3 flex items-center gap-1.5 rounded-sharp border border-line px-3 py-1.5 text-xs text-alert"
                           >
                             <Trash2 size={13} strokeWidth={1.75} />
                             この教材を削除
