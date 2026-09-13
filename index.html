@@ -12,7 +12,15 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- black-translucent は使わない。これを指定すると iOS は WebView を
+         「画面の高さ − 上部セーフエリア」で上端に固定して配置するため、
+         下端のセーフエリア帯が WebView の外に出てしまい、タブバーの下に
+         OS の黒帯が残る(ページ内の CSS/JS からは到達も計測もできない)。
+         black なら WebView が画面いっぱいに配置され、下端の
+         env(safe-area-inset-bottom) が実際の画面端に対して効く。
+         ※ apple-mobile-web-app-* は iOS がインストール時に固定するため、
+           変更を反映するにはホーム画面のアイコンを削除して追加し直す必要がある。 -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="勉強時間" />
     <title>勉強時間管理</title>
   </head>

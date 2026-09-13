@@ -139,20 +139,9 @@
 
 @layer base {
   html,
-  body {
-    height: 100%;
-  }
-
-  /* iOS のホーム画面 PWA で、下端に隙間が残る問題への対処。
-     apple-mobile-web-app-status-bar-style: black-translucent を使うと、
-     描画は画面全体なのに height:100%(や 100dvh)が
-     「画面の高さ − ステータスバーの高さ」に解決されることがある。
-     上端は safe-area-inset-top で正しく避けられる一方、
-     下端にはステータスバーと同じ高さの空きが残ってしまう。
-     割合指定をやめ、4辺を固定すると実際の画面いっぱいになる。 */
+  body,
   #root {
-    position: fixed;
-    inset: 0;
+    height: 100%;
   }
 
   body {
