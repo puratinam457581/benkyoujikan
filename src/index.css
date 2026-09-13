@@ -139,22 +139,20 @@
 
 @layer base {
   html,
-  body,
-  #root {
+  body {
     height: 100%;
   }
 
-  /* iOS のホーム画面 PWA では height:100% が「ホームバーを除いた高さ」に
-     解決されることがある。タブバー側でも env(safe-area-inset-bottom) を
-     足しているため、それだと下端の安全余白を二重に取ってしまい、
-     タブバーの下に帯状の空きができる(実機で確認された症状)。
-     dvh は画面全体の高さを指すので、二重計上にならない。 */
-  @supports (height: 100dvh) {
-    html,
-    body,
-    #root {
-      height: 100dvh;
-    }
+  /* iOS のホーム画面 PWA で、下端に隙間が残る問題への対処。
+     apple-mobile-web-app-status-bar-style: black-translucent を使うと、
+     描画は画面全体なのに height:100%(や 100dvh)が
+     「画面の高さ − ステータスバーの高さ」に解決されることがある。
+     上端は safe-area-inset-top で正しく避けられる一方、
+     下端にはステータスバーと同じ高さの空きが残ってしまう。
+     割合指定をやめ、4辺を固定すると実際の画面いっぱいになる。 */
+  #root {
+    position: fixed;
+    inset: 0;
   }
 
   body {
