@@ -1,10 +1,9 @@
-import { Sun, Moon } from 'lucide-react'
-import { useTheme } from '../theme/ThemeProvider.jsx'
 import { TABS, useNavigation } from '../navigation/NavigationContext.jsx'
 
-// 画面上部の細いバー。左にタイトル、右にテーマ切替。
+// 画面上部の細いバー。アプリ名 + いま開いている画面名。
+// 画面名をここで出すぶん、各画面は本文だけを持つ(見出しの二重表示をなくす)。
+// テーマ切替は設定画面に集約した(同じ操作が2か所にあると探しにくいため)。
 export default function Header() {
-  const { theme, toggle } = useTheme()
   const { tab } = useNavigation()
   const label = TABS.find((t) => t.key === tab)?.label ?? ''
 
@@ -19,21 +18,14 @@ export default function Header() {
         aria-hidden
         className="edge-line pointer-events-none absolute inset-x-0 bottom-0 h-px"
       />
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-baseline gap-2">
-          <span className="font-hud text-glow text-base font-bold tracking-widest text-cyan">
-            勉強時間
-          </span>
-          <span className="text-xs text-hud-faint">{label}</span>
-        </div>
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={theme === 'light' ? 'ダークテーマに切り替え' : 'ライトテーマに切り替え'}
-          className="flex h-9 w-9 items-center justify-center rounded-sharp border border-line text-hud-dim hover:text-hud"
-        >
-          {theme === 'light' ? <Moon size={18} strokeWidth={1.5} /> : <Sun size={18} strokeWidth={1.5} />}
-        </button>
+      <div className="flex items-baseline gap-2 px-4 py-3">
+        <span className="font-hud text-glow text-xs font-bold tracking-widest text-cyan md:hidden">
+          勉強時間
+        </span>
+        <span aria-hidden className="text-hud-faint md:hidden">
+          /
+        </span>
+        <h1 className="font-hud text-base font-bold tracking-wide text-hud">{label}</h1>
       </div>
     </header>
   )

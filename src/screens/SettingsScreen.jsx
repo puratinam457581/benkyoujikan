@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { LogOut, Sun, Moon, Trash2 } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
+import Section from '../components/Section.jsx'
 import MaterialStylesSection from './MaterialStylesSection.jsx'
 import { useAuth } from '../auth/AuthProvider.jsx'
 import { useTheme } from '../theme/ThemeProvider.jsx'
 import { useData } from '../data/DataProvider.jsx'
 import { formatMinutes, formatDateLabel } from '../utils/date.js'
+
+const THEMES = [
+  { key: 'dark', label: 'ダーク', icon: Moon },
+  { key: 'light', label: 'ライト', icon: Sun },
+]
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth()
@@ -34,11 +40,9 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScreenScaffold title="設定">
-      {/* アカウント */}
-      <section className="panel px-4 py-3">
-        <p className="text-xs text-hud-dim">ログイン中のアカウント</p>
-        <p className="mt-1 font-semibold text-hud">{user?.displayName || '(名前なし)'}</p>
+    <ScreenScaffold>
+      <Section title="アカウント">
+        <p className="font-semibold text-hud">{user?.displayName || '(名前なし)'}</p>
         <p className="text-sm text-hud-faint">{user?.email}</p>
         <p className="mt-2 text-xs text-hud-faint">
           記録 {records.length} 件 / 累計 {formatMinutes(totalMin)}
@@ -47,51 +51,29 @@ export default function SettingsScreen() {
           <LogOut size={16} strokeWidth={1.5} />
           サインアウト
         </button>
-      </section>
+      </Section>
 
-      {/* テーマ */}
-      <section className="panel px-4 py-3">
-        <p className="text-xs text-hud-dim">テーマ</p>
-        <div className="mt-2 flex gap-2">
-          <button
-            type="button"
-            onClick={() => setTheme('dark')}
-            aria-pressed={theme === 'dark'}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-panel border px-3 py-2 text-sm ${
-              theme === 'dark'
-                ? 'border-cyan text-cyan'
-                : 'border-line text-hud-dim hover:text-hud'
-            }`}
-          >
-            <Sun size={16} strokeWidth={1.5} />
-            ダーク
-          </button>
-          <button
-            type="button"
-            onClick={() => setTheme('light')}
-            aria-pressed={theme === 'light'}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-panel border px-3 py-2 text-sm ${
-              theme === 'light'
-                ? 'border-cyan text-cyan'
-                : 'border-line text-hud-dim hover:text-hud'
-            }`}
-          >
-            <Moon size={16} strokeWidth={1.5} />
-            ライト
-          </button>
+      <Section title="テーマ" hint="選んだテーマはこの端末に保存され、次回起動時も同じ表示になります。">
+        <div className="segmented">
+          {THEMES.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTheme(key)}
+              aria-pressed={theme === key}
+              className="flex items-center justify-center gap-2"
+            >
+              <Icon size={16} strokeWidth={1.5} />
+              {label}
+            </button>
+          ))}
         </div>
-        <p className="mt-2 text-xs text-hud-faint">
-          選んだテーマはこの端末に保存され、次回起動時も同じ表示になります。
-        </p>
-      </section>
+      </Section>
 
-      {/* 学習管理システム連携 */}
-      <section className="panel px-4 py-3">
-        <p className="text-xs text-hud-dim">現在フェーズ開始日</p>
-        <p className="mt-1 mb-2 text-[11px] leading-relaxed text-hud-faint">
-          過去ログ出力の「現在フェーズの累計」の起点。学習フェーズが切り替わったら
-          （例: 10/1, 10/26）ここを更新してください。
-        </p>
+      <Section
+        title="現在フェーズ開始日"
+        hint="過去ログ出力の「現在フェーズの累計」の起点。学習フェーズが切り替わったら（例: 10/1, 10/26）ここを更新してください。"
+      >
         <input
           type="date"
           value={appConfig.phaseStart || ''}
@@ -99,23 +81,21 @@ export default function SettingsScreen() {
           className="field-input font-digit w-44"
         />
         {appConfig.phaseStart && (
-          <p className="mt-1 text-[11px] text-hud-faint">
+          <p className="mt-1.5 text-[11px] text-hud-faint">
             {formatDateLabel(appConfig.phaseStart)} から
           </p>
         )}
-      </section>
+      </Section>
 
       <MaterialStylesSection />
 
-      {/* データの全削除 */}
-      <section className="panel px-4 py-3" style={{ borderColor: 'var(--color-alert)' }}>
-        <p className="text-xs" style={{ color: 'var(--color-alert)' }}>
-          データの全削除
-        </p>
-        <p className="mt-1 mb-2 text-[11px] leading-relaxed text-hud-faint">
-          記録・教材マスタ・タグ・色設定・フェーズ開始日をすべて消します。
-          <strong>取り消せません。</strong>アカウント自体は残ります。
-        </p>
+      <Section
+        title="データの全削除"
+        tone="alert"
+        collapsible
+        defaultOpen={false}
+        hint="記録・教材マスタ・タグ・色設定・進捗・日記をすべて消します。取り消せません。アカウント自体は残ります。"
+      >
         <button
           type="button"
           className="btn btn-danger text-sm"
@@ -125,7 +105,7 @@ export default function SettingsScreen() {
           <Trash2 size={15} strokeWidth={1.75} />
           {wiping ? '削除中…' : 'すべてのデータを削除'}
         </button>
-      </section>
+      </Section>
     </ScreenScaffold>
   )
 }

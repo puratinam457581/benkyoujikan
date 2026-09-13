@@ -1,18 +1,7 @@
-// 各画面の共通の外枠。本文は読みやすい幅で中央寄せ、上下に余白。
-export default function ScreenScaffold({ title, description, children }) {
+// 各画面の共通の外枠。本文は読みやすい幅で中央寄せ。
+// 画面名はヘッダーが表示するので、ここでは持たない(二重表示を避ける)。
+export default function ScreenScaffold({ children }) {
   return (
-    <div className="content-normal flex flex-col gap-4 px-4 pt-5 pb-20 sm:px-5">
-      {(title || description) && (
-        <div>
-          {title && (
-            <h1 className="font-hud text-xl font-bold tracking-wide text-hud">{title}</h1>
-          )}
-          {description && (
-            <p className="mt-1 text-sm text-hud-dim">{description}</p>
-          )}
-        </div>
-      )}
-      {children}
-    </div>
+    <div className="content-normal flex flex-col gap-5 px-4 pt-4 pb-20 sm:px-5">{children}</div>
   )
 }

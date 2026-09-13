@@ -2,11 +2,12 @@ import { createContext, useContext, useState, useCallback } from 'react'
 
 // ルーターは使わず、状態1つで表示中の画面を切り替える(spec 7章)。
 // 画面数が少なく、URLで共有する要件も無いため、これで十分。
+// 「総計」と「比較」はどちらも集計を見る画面で内容も重なるため、
+// 「分析」1タブにまとめ、画面内で累計/比較を切り替える(タブは5つ)。
 export const TABS = [
   { key: 'home', label: 'ホーム' },
   { key: 'calendar', label: 'カレンダー' },
-  { key: 'total', label: '総計' },
-  { key: 'compare', label: '比較' },
+  { key: 'analysis', label: '分析' },
   { key: 'export', label: '出力' },
   { key: 'settings', label: '設定' },
 ]

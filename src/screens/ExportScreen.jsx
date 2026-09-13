@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Copy, Share2, Check, Settings2 } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
+import Section from '../components/Section.jsx'
 import { useData } from '../data/DataProvider.jsx'
 import { useNavigation } from '../navigation/NavigationContext.jsx'
 import { buildExportLog } from '../utils/exportLog.js'
@@ -54,46 +55,60 @@ export default function ExportScreen() {
   }
 
   return (
-    <ScreenScaffold title="過去ログ出力">
-      <p className="text-sm leading-relaxed text-hud-dim">
-        毎朝これをコピーして、iPad/iPhone の Claude（学習計画のプロジェクト）に貼り付けると、
-        今日の学習計画を作ってもらえます。対象は <span className="font-digit">{yesterday}</span>{' '}
-        まで（当日ぶんは含みません）。直近7日間の推移、前日の日記(書いていれば)、
-        設定した教材の進捗(残り分量・残り時間の目安)も含みます。
-      </p>
+    <ScreenScaffold>
+      <section className="panel px-4 py-4">
+        <p className="text-sm leading-relaxed text-hud-dim">
+          毎朝これをコピーして、iPad/iPhone の Claude（学習計画のプロジェクト）に貼り付けると、
+          今日の学習計画を作ってもらえます。
+        </p>
 
-      <div className="flex flex-wrap gap-2">
-        <button type="button" className="btn btn-primary text-sm" onClick={copy}>
-          {copied ? <Check size={16} strokeWidth={2.5} /> : <Copy size={16} strokeWidth={1.75} />}
-          {copied ? 'コピーしました' : 'コピー'}
-        </button>
-        {canShare && (
-          <button type="button" className="btn btn-ghost text-sm" onClick={share}>
-            <Share2 size={16} strokeWidth={1.75} />
-            共有
+        <div className="mt-4 flex gap-2">
+          <button type="button" className="btn btn-primary flex-1 text-sm" onClick={copy}>
+            {copied ? <Check size={16} strokeWidth={2.5} /> : <Copy size={16} strokeWidth={1.75} />}
+            {copied ? 'コピーしました' : 'コピー'}
           </button>
-        )}
-        <button
-          type="button"
-          className="btn btn-ghost text-sm"
-          onClick={() => setTab('settings')}
-        >
-          <Settings2 size={16} strokeWidth={1.75} />
-          フェーズ開始日: {appConfig.phaseStart ? formatDateLabel(appConfig.phaseStart) : '未設定'}
-        </button>
-      </div>
+          {canShare && (
+            <button type="button" className="btn btn-ghost flex-1 text-sm" onClick={share}>
+              <Share2 size={16} strokeWidth={1.75} />
+              共有
+            </button>
+          )}
+        </div>
 
-      {loading ? (
-        <p className="text-sm text-hud-faint">読み込み中…</p>
-      ) : (
-        <pre
-          id="export-text"
-          className="panel overflow-x-auto whitespace-pre-wrap break-words px-3 py-3 text-[12px] leading-relaxed text-hud"
-          style={{ fontFamily: 'var(--font-digit)' }}
-        >
-          {text}
-        </pre>
-      )}
+        <dl className="mt-4 flex flex-col gap-1.5 border-t border-line pt-3 text-[11px]">
+          <div className="flex items-center justify-between gap-2">
+            <dt className="text-hud-faint">対象</dt>
+            <dd className="font-digit text-hud-dim">{yesterday} まで（当日ぶんは含まず）</dd>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <dt className="text-hud-faint">フェーズ開始日</dt>
+            <dd>
+              <button
+                type="button"
+                onClick={() => setTab('settings')}
+                className="flex items-center gap-1 text-cyan"
+              >
+                <Settings2 size={12} strokeWidth={1.75} />
+                {appConfig.phaseStart ? formatDateLabel(appConfig.phaseStart) : '未設定'}
+              </button>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <Section title="出力内容のプレビュー">
+        {loading ? (
+          <p className="text-sm text-hud-faint">読み込み中…</p>
+        ) : (
+          <pre
+            id="export-text"
+            className="overflow-x-auto whitespace-pre-wrap break-words text-[12px] leading-relaxed text-hud"
+            style={{ fontFamily: 'var(--font-digit)' }}
+          >
+            {text}
+          </pre>
+        )}
+      </Section>
     </ScreenScaffold>
   )
 }

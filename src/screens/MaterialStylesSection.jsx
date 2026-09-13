@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Trash2, Check, Plus, Sparkles } from 'lucide-react'
+import Section from '../components/Section.jsx'
 import { useData } from '../data/DataProvider.jsx'
 import { comboKey } from '../data/tags.js'
 import { subjectRank } from '../data/master.js'
@@ -210,14 +211,12 @@ export default function MaterialStylesSection() {
     records.some((r) => r.subject === subject && r.material === name)
 
   return (
-    <section className="panel px-4 py-3">
-      <p className="text-xs text-hud-dim">教材(学習管理システム連携)</p>
-      <p className="mt-1 mb-3 text-[11px] leading-relaxed text-hud-faint">
-        色・アイコン、完了フラグ、使わない教材の整理。過去ログ出力の一覧はこの教材マスタが元になります（
-        <Trash2 size={11} strokeWidth={2} className="mx-0.5 inline align-[-1px]" />
-        で削除しても過去の記録は消えません）。
-      </p>
-
+    <Section
+      title={`教材(${master.items.length})`}
+      collapsible
+      defaultOpen={false}
+      hint="色・アイコン、進捗、完了フラグ、使わない教材の整理。過去ログ出力の一覧はこの教材マスタが元になります（削除しても過去の記録は消えません）。"
+    >
       <div className="mb-3 flex flex-wrap gap-2">
         <button
           type="button"
@@ -439,6 +438,6 @@ export default function MaterialStylesSection() {
           ))}
         </div>
       )}
-    </section>
+    </Section>
   )
 }

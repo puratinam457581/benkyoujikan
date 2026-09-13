@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ScreenScaffold from '../components/ScreenScaffold.jsx'
+import Section from '../components/Section.jsx'
 import SubjectBreakdown from '../components/SubjectBreakdown.jsx'
 import RecordRow from '../components/RecordRow.jsx'
 import DiaryCard from '../components/DiaryCard.jsx'
@@ -43,55 +44,64 @@ export default function CalendarScreen() {
 
   const monthTotal = cells.reduce((s, ds) => s + (ds ? totals.get(ds) || 0 : 0), 0)
   const maxDay = Math.max(1, ...cells.map((ds) => (ds ? totals.get(ds) || 0 : 0)))
+  const isThisMonth = startOfMonthStr(today) === viewMonth
 
   const selectedRecords = selected ? recordsOnDate(records, selected) : []
   const selectedMin = selectedRecords.reduce((s, r) => s + r.minutes, 0)
 
   return (
     <ScreenScaffold>
-      {/* 月の切り替え */}
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          aria-label="前の月"
-          onClick={() => setViewMonth((m) => addMonthsStr(m, -1))}
-          className="rounded-sharp border border-line p-2 text-hud-dim hover:text-hud"
-        >
-          <ChevronLeft size={18} strokeWidth={1.75} />
-        </button>
-        <div className="text-center">
-          <p className="font-hud text-lg font-bold text-hud">
-            {year}年{month + 1}月
-          </p>
-          <p className="font-digit text-xs text-hud-faint">計 {formatMinutes(monthTotal)}</p>
+      {/* 月の切り替えとカレンダーを1枚にまとめる(別々の行に散らさない) */}
+      <div className="panel px-2 pb-2 pt-3">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <button
+            type="button"
+            aria-label="前の月"
+            onClick={() => setViewMonth((m) => addMonthsStr(m, -1))}
+            className="rounded-sharp border border-line p-1.5 text-hud-dim hover:text-hud"
+          >
+            <ChevronLeft size={18} strokeWidth={1.75} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMonth(startOfMonthStr(today))}
+            disabled={isThisMonth}
+            className="flex flex-col items-center leading-tight disabled:cursor-default"
+          >
+            <span className="font-hud text-base font-bold text-hud">
+              {year}年{month + 1}月
+            </span>
+            {isThisMonth ? (
+              <span className="font-digit text-[11px] text-hud-faint">
+                計 {formatMinutes(monthTotal)}
+              </span>
+            ) : (
+              <span className="text-[11px] text-cyan">今月に戻る</span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            aria-label="次の月"
+            onClick={() => setViewMonth((m) => addMonthsStr(m, 1))}
+            className="rounded-sharp border border-line p-1.5 text-hud-dim hover:text-hud"
+          >
+            <ChevronRight size={18} strokeWidth={1.75} />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="次の月"
-          onClick={() => setViewMonth((m) => addMonthsStr(m, 1))}
-          className="rounded-sharp border border-line p-2 text-hud-dim hover:text-hud"
-        >
-          <ChevronRight size={18} strokeWidth={1.75} />
-        </button>
-      </div>
 
-      {startOfMonthStr(today) !== viewMonth && (
-        <button
-          type="button"
-          onClick={() => setViewMonth(startOfMonthStr(today))}
-          className="chip self-center"
-        >
-          今月に戻る
-        </button>
-      )}
+        {!isThisMonth && (
+          <p className="font-digit mb-1 text-center text-[11px] text-hud-faint">
+            計 {formatMinutes(monthTotal)}
+          </p>
+        )}
 
-      {/* カレンダー本体 */}
-      <div className="panel p-2">
         <div className="grid grid-cols-7">
           {WEEK.map((w, i) => (
             <div
               key={w}
-              className={`pb-1 text-center text-[11px] font-semibold ${
+              className={`pb-1.5 text-center text-[11px] font-semibold ${
                 i === 0 ? 'text-alert' : i === 6 ? 'text-electric' : 'text-hud-faint'
               }`}
             >
@@ -139,12 +149,10 @@ export default function CalendarScreen() {
       </div>
 
       {/* 選択した日の内訳 */}
-      <section className="panel px-4 py-4">
-        <div className="mb-3 flex items-baseline justify-between">
-          <p className="field-label">{selected ? formatDateLabel(selected) : '日付を選択'}</p>
-          <p className="font-digit text-sm text-hud-dim">{formatMinutes(selectedMin)}</p>
-        </div>
-
+      <Section
+        title={selected ? formatDateLabel(selected) : '日付を選択'}
+        action={<span className="font-digit text-sm text-hud-dim">{formatMinutes(selectedMin)}</span>}
+      >
         {loading ? (
           <p className="text-sm text-hud-faint">読み込み中…</p>
         ) : selectedMin === 0 ? (
@@ -159,7 +167,7 @@ export default function CalendarScreen() {
             </div>
           </>
         )}
-      </section>
+      </Section>
 
       {/* この日の日記(任意)。記録の有無に関わらず書ける */}
       {selected && <DiaryCard date={selected} title={`${formatDateLabel(selected)}の日記(任意)`} />}
