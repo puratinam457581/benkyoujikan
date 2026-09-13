@@ -144,6 +144,19 @@
     height: 100%;
   }
 
+  /* iOS のホーム画面 PWA では height:100% が「ホームバーを除いた高さ」に
+     解決されることがある。タブバー側でも env(safe-area-inset-bottom) を
+     足しているため、それだと下端の安全余白を二重に取ってしまい、
+     タブバーの下に帯状の空きができる(実機で確認された症状)。
+     dvh は画面全体の高さを指すので、二重計上にならない。 */
+  @supports (height: 100dvh) {
+    html,
+    body,
+    #root {
+      height: 100dvh;
+    }
+  }
+
   body {
     font-family: var(--font-body);
     color: var(--color-hud);
